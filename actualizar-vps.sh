@@ -47,6 +47,42 @@ fi
 echo -e "${GREEN}✅ Código actualizado${NC}"
 echo ""
 
+# Paso 1.5: Verificar/crear bases de datos ANTES de compilar (opcional pero recomendado)
+echo -e "${GREEN}📊 Paso 1.5: Verificando/creando bases de datos y tablas...${NC}"
+
+if [ -f ".env" ]; then
+    MYSQL_HOST=$(grep "^MYSQL_HOST=" .env 2>/dev/null | cut -d'=' -f2 | tr -d '"' | tr -d "'" || echo "localhost")
+    MYSQL_PORT=$(grep "^MYSQL_PORT=" .env 2>/dev/null | cut -d'=' -f2 | tr -d '"' | tr -d "'" || echo "3306")
+    MYSQL_USER=$(grep "^MYSQL_USER=" .env 2>/dev/null | cut -d'=' -f2 | tr -d '"' | tr -d "'" || echo "metin2")
+    MYSQL_PASSWORD=$(grep "^MYSQL_PASSWORD=" .env 2>/dev/null | cut -d'=' -f2 | tr -d '"' | tr -d "'" || echo "changeme")
+    
+    if [ "$MYSQL_HOST" = "localhost" ]; then
+        MYSQL_HOST="127.0.0.1"
+    fi
+    
+    export MYSQL_PWD="$MYSQL_PASSWORD"
+    
+    # Crear bases de datos si no existen
+    echo -e "${YELLOW}   Creando bases de datos si no existen...${NC}"
+    mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -e "CREATE DATABASE IF NOT EXISTS metin2_account CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
+    mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -e "CREATE DATABASE IF NOT EXISTS metin2_common CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
+    mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -e "CREATE DATABASE IF NOT EXISTS metin2_player CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
+    mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -e "CREATE DATABASE IF NOT EXISTS metin2_log CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
+    
+    # Ejecutar script SQL básico
+    if [ -f "docker/create-all-tables.sql" ]; then
+        echo -e "${YELLOW}   Creando/actualizando tablas...${NC}"
+        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" < docker/create-all-tables.sql 2>&1 | grep -v "already exists" || true
+        echo -e "${GREEN}   ✅ Bases de datos y tablas verificadas/creadas${NC}"
+    fi
+    
+    unset MYSQL_PWD
+else
+    echo -e "${YELLOW}⚠️  No se encontró .env. Saltando verificación previa de BD${NC}"
+fi
+
+echo ""
+
 # Paso 2: Detener contenedor actual
 echo -e "${GREEN}🛑 Paso 2: Deteniendo contenedor actual...${NC}"
 docker stop metin2-server 2>/dev/null || true
