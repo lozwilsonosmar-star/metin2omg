@@ -194,40 +194,6 @@ CREATE TABLE IF NOT EXISTS refine_proto (
     count4 INT UNSIGNED NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla de prototipos de habilidades (skill_proto)
-CREATE TABLE IF NOT EXISTS skill_proto (
-    dwVnum INT UNSIGNED NOT NULL PRIMARY KEY,
-    szName VARCHAR(32) NOT NULL DEFAULT '',
-    bType TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    bMaxLevel TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    dwSplashRange INT UNSIGNED NOT NULL DEFAULT 0,
-    szPointOn VARCHAR(64) NOT NULL DEFAULT '',
-    szPointPoly VARCHAR(100) NOT NULL DEFAULT '',
-    szSPCostPoly VARCHAR(100) NOT NULL DEFAULT '',
-    szDurationPoly VARCHAR(100) NOT NULL DEFAULT '',
-    szDurationSPCostPoly VARCHAR(100) NOT NULL DEFAULT '',
-    szCooldownPoly VARCHAR(100) NOT NULL DEFAULT '',
-    szMasterBonusPoly VARCHAR(100) NOT NULL DEFAULT '',
-    setFlag INT UNSIGNED NOT NULL DEFAULT 0,
-    setAffectFlag INT UNSIGNED NOT NULL DEFAULT 0,
-    szPointOn2 VARCHAR(64) NOT NULL DEFAULT '',
-    szPointPoly2 VARCHAR(100) NOT NULL DEFAULT '',
-    szDurationPoly2 VARCHAR(100) NOT NULL DEFAULT '',
-    setAffectFlag2 INT UNSIGNED NOT NULL DEFAULT 0,
-    szPointOn3 VARCHAR(64) NOT NULL DEFAULT '',
-    szPointPoly3 VARCHAR(100) NOT NULL DEFAULT '',
-    szDurationPoly3 VARCHAR(100) NOT NULL DEFAULT '',
-    szGrandMasterAddSPCostPoly VARCHAR(100) NOT NULL DEFAULT '',
-    bLevelStep TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    bLevelLimit TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    prerequisiteSkillVnum INT UNSIGNED NOT NULL DEFAULT 0,
-    prerequisiteSkillLevel TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    iMaxHit INT NOT NULL DEFAULT 0,
-    szSplashAroundDamageAdjustPoly VARCHAR(100) NOT NULL DEFAULT '',
-    eSkillType TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    dwTargetRange INT UNSIGNED NOT NULL DEFAULT 0,
-    INDEX idx_bType (bType)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla de prototipos de items de quest (quest_item_proto)
 CREATE TABLE IF NOT EXISTS quest_item_proto (
