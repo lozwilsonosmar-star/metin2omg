@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  metin2-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: metin2/server:latest
+    container_name: metin2-server
+    restart: unless-stopped
+    ports:
+      - "12345:12345"   # Game port
+      - "13200:13200"   # P2P port
+      - "8888:8888"     # DB port
+    env_file:
+      - .env
+    environment:
+      - PUBLIC_BIND_IP=0.0.0.0
+      - INTERNAL_BIND_IP=0.0.0.0
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - metin2-network
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: mariadb:11
+    container_name: metin2-mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: metin2_account
+      MYSQL_USER: ${MYSQL_USER:-metin2}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "3306:3306"
+    networks:
+      - metin2-network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mariadb-data:
+
+networks:
+  metin2-network:
+    driver: bridge
+

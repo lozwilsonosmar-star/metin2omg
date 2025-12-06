@@ -29,7 +29,7 @@ RUN cd build && make -j $(nproc)
 FROM ubuntu:24.04 AS app
 WORKDIR /app
 
-# Install Python 2.7 from deadsnakes PPA (required for quest compilation)
+# SOLUCIÓN: Instalar Python 2.7 desde deadsnakes PPA
 RUN apt-get update && apt-get install -y software-properties-common && apt-get clean
 RUN add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt-get update && apt-get install -y gettext python2.7 libdevil-dev libbsd-dev && apt-get clean
@@ -61,3 +61,4 @@ ENV PUBLIC_BIND_IP=0.0.0.0
 ENV INTERNAL_BIND_IP=0.0.0.0
 
 ENTRYPOINT ["/usr/bin/bash", "docker-entrypoint.sh"]
+

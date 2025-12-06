@@ -13,6 +13,8 @@ A Docker Compose project is maintained in the [Deployment project](https://git.o
 Please head over there for further instructions.
 
 ## 2. Building
+
+**Note:** This project is compatible with Ubuntu 22.04 and 24.04. For Ubuntu 24.04, see the [specific instructions](#ubuntu-2404-specific-instructions) below.
 ### A. Building Docker images
 #### Building a Docker image from the repository
 In order to build a local Docker image on your local architecture, just build the
@@ -44,6 +46,9 @@ at times. FreeBSD/Windows compatibility is untested and unsupported for the
 time being - there are other projects out there if that's what you want.
 
 #### Setting up the requirements
+
+**Important for Ubuntu 24.04 users:** This project requires Python 2.7 for quest compilation, which is not available by default in Ubuntu 24.04. See the [Ubuntu 24.04 specific instructions](#ubuntu-2404-specific-instructions) below.
+
 On your Linux box, install the dependencies for `vcpkg` and the other libraries
 we're going to install.
 ```shell
@@ -61,6 +66,45 @@ Install `vcpkg` according to the [latest instructions](https://vcpkg.io/en/getti
 Build and install the required libraries:
 ```shell
 vcpkg install cryptopp effolkronium-random libmariadb libevent lzo fmt spdlog argon2
+```
+
+#### Ubuntu 24.04 Specific Instructions
+
+**Python 2.7 Requirement:** The quest compilation script (`gamefiles/data/quest/make.py`) requires Python 2.7, which was removed from Ubuntu 24.04. You need to install it from the deadsnakes PPA:
+
+```shell
+# Install Python 2.7 from deadsnakes PPA
+apt-get update
+apt-get install -y software-properties-common
+add-apt-repository -y ppa:deadsnakes/ppa
+apt-get update
+apt-get install -y python2.7
+
+# Create symlink for python2
+ln -s /usr/bin/python2.7 /usr/bin/python2
+```
+
+**Quick Installation Script:** For convenience, you can use the provided installation script:
+
+```shell
+sudo bash instalar-en-vps.sh
+```
+
+This script will automatically:
+- Install Python 2.7 from deadsnakes PPA
+- Install all required system dependencies
+- Set up vcpkg and install all required libraries
+
+**Database Compatibility Note:** While the documentation mentions MySQL 5.x, the codebase uses `libmariadb` which is compatible with:
+- MySQL 5.x, 6.x, 7.x, 8.x
+- MariaDB 10.x, 11.x
+
+Ubuntu 24.04 includes MariaDB/MySQL 8.x by default, which works perfectly with this project.
+
+**Docker Users:** The Dockerfile has been updated to support Ubuntu 24.04 and automatically handles the Python 2.7 installation. Simply build as usual:
+
+```shell
+docker build -t metin2/server:test --provenance=false .
 ```
 
 #### Building the binaries
@@ -89,7 +133,7 @@ the "game" target for the latter two. Make sure each service has its own working
 directory with all the required configuration and game files.
 4. Optionally, add a "Compound" configuration containing these three configurations
 in order to start them at once.
-5. Of course, you'll need a MySQL 5.x database, Valgrind and any other development
+5. Of course, you'll need a MySQL/MariaDB database (MySQL 5.x, 8.x, or MariaDB 10.x/11.x are all compatible), Valgrind and any other development
 goodies you wish. Also, a lot of time.
 
 ### Creating a minimal test server (WIP)
@@ -150,3 +194,63 @@ This is a very serious security risk and one of the reasons this project is stil
 - Perform static and runtime analysis.
 - Find and implement other fitting improvements from projects such as [Vanilla's core](https://metin2.dev/topic/14770-vanilla-core-latest-r71480/), [TMP's serverfiles](https://metin2.dev/topic/27610-40250-reference-serverfile-client-src-15-available-languages/).
 - Find time to take care of this project.
+
+## 6. Troubleshooting
+
+### Ubuntu 24.04 Issues
+
+**Problem: `python2: command not found` during quest compilation**
+
+**Solution:** Python 2.7 is not available by default in Ubuntu 24.04. Install it from deadsnakes PPA:
+```shell
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+sudo apt-get update
+sudo apt-get install -y python2.7
+sudo ln -s /usr/bin/python2.7 /usr/bin/python2
+```
+
+**Problem: Docker build fails with `python2` not found**
+
+**Solution:** The Dockerfile has been updated for Ubuntu 24.04. Make sure you're using the latest version. If you're using an older Dockerfile, update it to include the Python 2.7 installation steps.
+
+**Problem: CMake repository errors on Ubuntu 24.04**
+
+**Solution:** The CMake repository URL in the Dockerfile uses `noble` (Ubuntu 24.04 codename) instead of `jammy` (Ubuntu 22.04). Make sure your Dockerfile is up to date.
+
+### General Issues
+
+**Problem: vcpkg installation fails**
+
+**Solution:** Make sure you have all required dependencies:
+```shell
+apt-get install -y git cmake build-essential tar curl zip unzip pkg-config autoconf python3
+```
+
+**Problem: Database connection errors**
+
+**Solution:** 
+- Verify MySQL/MariaDB is running: `systemctl status mysql` or `systemctl status mariadb`
+- Check database credentials in `db.conf` and `game.conf`
+- Ensure databases are created: `account`, `common`, `player`, `log`
+- Verify network connectivity and firewall settings
+
+**Problem: Quest compilation errors**
+
+**Solution:**
+- Ensure Python 2.7 is installed and accessible as `python2`
+- Check file permissions in `gamefiles/data/quest/`
+- Verify all quest files are present and readable
+
+**Problem: Build fails with missing libraries**
+
+**Solution:** Make sure all vcpkg libraries are installed:
+```shell
+vcpkg install cryptopp effolkronium-random libmariadb libevent lzo fmt spdlog argon2
+```
+
+### Getting Help
+
+- Check the [Deployment project](https://git.old-metin2.com/metin2/deploy) for Docker Compose examples
+- Review the [analysis document](ANALISIS_UBUNTU24.md) for Ubuntu 24.04 compatibility details
+- Ensure you're using the latest version of the repository
