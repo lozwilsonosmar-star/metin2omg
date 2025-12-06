@@ -71,7 +71,7 @@ COPY ./gamefiles/ .
 COPY ./docker/ .
 
 # Make start script executable
-RUN chmod +x /app/docker/start-servers.sh
+RUN chmod +x /app/start-servers.sh
 
 # Compile the quests
 RUN cd /app/data/quest && python2 make.py
@@ -88,4 +88,4 @@ ENV PUBLIC_BIND_IP=0.0.0.0
 ENV INTERNAL_BIND_IP=0.0.0.0
 
 ENTRYPOINT ["/usr/bin/bash", "docker-entrypoint.sh"]
-CMD ["/app/docker/start-servers.sh"]
+CMD ["/app/start-servers.sh"]
