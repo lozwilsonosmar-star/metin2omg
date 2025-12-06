@@ -44,11 +44,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean
 
 # Compile Python 2.7 from source (not available in Ubuntu 24.04 repositories)
+# Note: --enable-optimizations is disabled to speed up compilation and avoid test failures in containers
 RUN cd /tmp && \
     wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && \
     tar xzf Python-2.7.18.tgz && \
     cd Python-2.7.18 && \
-    ./configure --prefix=/usr/local --enable-optimizations && \
+    ./configure --prefix=/usr/local && \
     make -j $(nproc) && \
     make altinstall && \
     ln -s /usr/local/bin/python2.7 /usr/bin/python2.7 && \
