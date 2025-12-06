@@ -64,30 +64,9 @@ else
 fi
 
 echo ""
-echo -e "${GREEN}🔧 Paso 5: Instalando dependencias del proyecto...${NC}"
-if [ -f "instalar-en-vps.sh" ]; then
-    chmod +x instalar-en-vps.sh
-    # Modificar temporalmente para no instalar MySQL
-    sed -i 's/mariadb-server//g; s/mariadb-client//g' instalar-en-vps.sh 2>/dev/null || true
-    bash instalar-en-vps.sh
-else
-    echo -e "${YELLOW}⚠️  Script instalar-en-vps.sh no encontrado, instalando manualmente...${NC}"
-    
-    # Instalar Python 2.7
-    apt-get install -y software-properties-common
-    add-apt-repository -y ppa:deadsnakes/ppa
-    apt-get update
-    apt-get install -y python2.7
-    ln -sf /usr/bin/python2.7 /usr/bin/python2
-    
-    # Instalar otras dependencias
-    apt-get install -y \
-        cmake \
-        build-essential \
-        libdevil-dev \
-        libbsd-dev \
-        libncurses5-dev
-fi
+echo -e "${GREEN}🔧 Paso 5: Saltando instalación local (usaremos Docker)...${NC}"
+echo -e "${YELLOW}⚠️  Python 2.7 no está disponible en Ubuntu 24.04${NC}"
+echo -e "${GREEN}✅ Usaremos Docker que ya tiene Python 2.7 configurado${NC}"
 
 echo ""
 echo -e "${GREEN}🗄️ Paso 6: Configurando bases de datos en MySQL existente...${NC}"
