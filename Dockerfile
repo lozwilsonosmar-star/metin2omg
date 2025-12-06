@@ -34,28 +34,29 @@ RUN apt-get update && apt-get install -y software-properties-common && apt-get c
 RUN add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt-get update && apt-get install -y \
     gettext python2.7 libdevil-dev libbsd-dev \
-    build-essential cmake git ninja-build \
+    build-essential cmake \
     libncurses5-dev && apt-get clean
 RUN ln -s /usr/bin/python2.7 /usr/bin/python2
 
-# Copy vcpkg and libraries from build stage (for compiling qc)
-COPY --from=build /app/vcpkg /app/vcpkg
-COPY --from=build /app/vcpkg/installed /app/vcpkg/installed
+# Copy source code for quest and liblua to compile qc
+COPY --from=build /app/src/quest /app/src/quest
+COPY --from=build /app/src/liblua /app/src/liblua
+COPY --from=build /app/src/quest/CMakeLists.txt /app/src/quest/CMakeLists.txt
+COPY --from=build /app/src/liblua/CMakeLists.txt /app/src/liblua/CMakeLists.txt
 
-# Copy source code to compile qc
-COPY --from=build /app/src /app/src
-COPY --from=build /app/CMakeLists.txt /app/CMakeLists.txt
-COPY --from=build /app/cmake /app/cmake
-
-# Build only qc in this stage (compatible with Ubuntu 22.04)
-RUN mkdir -p /app/build-quest && \
+# Build liblua first, then qc (compatible with Ubuntu 22.04)
+RUN mkdir -p /app/build-liblua && \
+    cd /app/build-liblua && \
+    cmake ../src/liblua && \
+    make -j $(nproc) && \
+    mkdir -p /app/build-quest && \
     cd /app/build-quest && \
-    cmake -DCMAKE_TOOLCHAIN_FILE=/app/vcpkg/scripts/buildsystems/vcpkg.cmake \
-          -DCMAKE_BUILD_TYPE=Release \
+    cmake -DCMAKE_BUILD_TYPE=Release \
+          -Dliblua_DIR=/app/build-liblua \
           ../src/quest && \
     make qc -j $(nproc) && \
     cp qc /bin/qc && \
-    rm -rf /app/build-quest /app/src /app/CMakeLists.txt /app/cmake /app/vcpkg
+    rm -rf /app/build-quest /app/build-liblua /app/src
 
 # Copy the binaries from the build stage
 COPY --from=build /app/build/src/db/db /bin/db
