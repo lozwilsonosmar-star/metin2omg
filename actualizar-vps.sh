@@ -102,6 +102,16 @@ if [ -f ".env" ]; then
     else
         echo -e "${RED}❌ No se encontró docker/create-all-tables.sql${NC}"
     fi
+    
+    # Verificación exhaustiva de tablas y columnas
+    echo ""
+    echo -e "${GREEN}🔍 Verificando tablas y columnas críticas...${NC}"
+    if [ -f "docker/verificar-y-actualizar-tablas.sh" ]; then
+        chmod +x docker/verificar-y-actualizar-tablas.sh
+        bash docker/verificar-y-actualizar-tablas.sh
+    else
+        echo -e "${YELLOW}⚠️  Script de verificación no encontrado${NC}"
+    fi
 else
     echo -e "${YELLOW}⚠️  No se encontró archivo .env${NC}"
     echo -e "${YELLOW}   Ejecutando script SQL manualmente...${NC}"
