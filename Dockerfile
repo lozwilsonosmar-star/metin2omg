@@ -29,17 +29,37 @@ RUN cd build && make -j $(nproc)
 FROM ubuntu:22.04 AS app
 WORKDIR /app
 
-# Install Python 2.7 from deadsnakes PPA (required for quest compilation)
-# Ubuntu 22.04 has Python 2.7 available in deadsnakes PPA
+# Install build dependencies and Python 2.7
 RUN apt-get update && apt-get install -y software-properties-common && apt-get clean
 RUN add-apt-repository -y ppa:deadsnakes/ppa
-RUN apt-get update && apt-get install -y gettext python2.7 libdevil-dev libbsd-dev && apt-get clean
+RUN apt-get update && apt-get install -y \
+    gettext python2.7 libdevil-dev libbsd-dev \
+    build-essential cmake git ninja-build \
+    libncurses5-dev && apt-get clean
 RUN ln -s /usr/bin/python2.7 /usr/bin/python2
+
+# Copy vcpkg and libraries from build stage (for compiling qc)
+COPY --from=build /app/vcpkg /app/vcpkg
+COPY --from=build /app/vcpkg/installed /app/vcpkg/installed
+
+# Copy source code to compile qc
+COPY --from=build /app/src /app/src
+COPY --from=build /app/CMakeLists.txt /app/CMakeLists.txt
+COPY --from=build /app/cmake /app/cmake
+
+# Build only qc in this stage (compatible with Ubuntu 22.04)
+RUN mkdir -p /app/build-quest && \
+    cd /app/build-quest && \
+    cmake -DCMAKE_TOOLCHAIN_FILE=/app/vcpkg/scripts/buildsystems/vcpkg.cmake \
+          -DCMAKE_BUILD_TYPE=Release \
+          ../src/quest && \
+    make qc -j $(nproc) && \
+    cp qc /bin/qc && \
+    rm -rf /app/build-quest /app/src /app/CMakeLists.txt /app/cmake /app/vcpkg
 
 # Copy the binaries from the build stage
 COPY --from=build /app/build/src/db/db /bin/db
 COPY --from=build /app/build/src/game/game /bin/game
-COPY --from=build /app/build/src/quest/qc /bin/qc
 
 # Copy the game files
 COPY ./gamefiles/ .
