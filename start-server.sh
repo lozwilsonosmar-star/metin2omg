@@ -76,3 +76,4 @@ echo ""
 echo "Ver logs con: docker logs -f metin2-server"
 echo "Detener con: docker stop metin2-server"
 
+

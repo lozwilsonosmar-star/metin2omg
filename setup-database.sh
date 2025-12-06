@@ -107,3 +107,4 @@ rm -f "$SQL_FILE"
 echo ""
 echo -e "${GREEN}✅ Configuración de base de datos completada!${NC}"
 
+

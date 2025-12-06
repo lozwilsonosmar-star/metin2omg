@@ -29,7 +29,7 @@ RUN cd build && make -j $(nproc)
 FROM ubuntu:24.04 AS app
 WORKDIR /app
 
-# Install build dependencies
+# Install build dependencies and MySQL client
 RUN apt-get update && apt-get install -y \
     gettext libdevil-dev libbsd-dev \
     build-essential cmake \
@@ -41,6 +41,7 @@ RUN apt-get update && apt-get install -y \
     libreadline-dev \
     libsqlite3-dev \
     libffi-dev \
+    default-mysql-client \
     && apt-get clean
 
 # Compile Python 2.7 from source (not available in Ubuntu 24.04 repositories)

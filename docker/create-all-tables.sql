@@ -145,12 +145,14 @@ CREATE TABLE IF NOT EXISTS horse_name (
 -- Tabla de tierras
 CREATE TABLE IF NOT EXISTS land (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    x1 INT NOT NULL DEFAULT 0,
-    y1 INT NOT NULL DEFAULT 0,
-    x2 INT NOT NULL DEFAULT 0,
-    y2 INT NOT NULL DEFAULT 0,
     map_index INT NOT NULL DEFAULT 0,
+    x INT NOT NULL DEFAULT 0,
+    y INT NOT NULL DEFAULT 0,
+    width INT NOT NULL DEFAULT 0,
+    height INT NOT NULL DEFAULT 0,
     guild_id INT UNSIGNED NOT NULL DEFAULT 0,
+    guild_level_limit TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    price INT UNSIGNED NOT NULL DEFAULT 0,
     enable ENUM('YES', 'NO') NOT NULL DEFAULT 'YES',
     INDEX idx_enable (enable),
     INDEX idx_guild_id (guild_id)
@@ -167,8 +169,128 @@ CREATE TABLE IF NOT EXISTS object (
     x_rot FLOAT NOT NULL DEFAULT 0.0,
     y_rot FLOAT NOT NULL DEFAULT 0.0,
     z_rot FLOAT NOT NULL DEFAULT 0.0,
+    life INT NOT NULL DEFAULT 0,
     INDEX idx_land_id (land_id),
     INDEX idx_map_index (map_index)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de prototipos de refinamiento (refine_proto)
+CREATE TABLE IF NOT EXISTS refine_proto (
+    id INT UNSIGNED NOT NULL PRIMARY KEY,
+    cost INT UNSIGNED NOT NULL DEFAULT 0,
+    prob INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum0 INT UNSIGNED NOT NULL DEFAULT 0,
+    count0 INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum1 INT UNSIGNED NOT NULL DEFAULT 0,
+    count1 INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum2 INT UNSIGNED NOT NULL DEFAULT 0,
+    count2 INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum3 INT UNSIGNED NOT NULL DEFAULT 0,
+    count3 INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum4 INT UNSIGNED NOT NULL DEFAULT 0,
+    count4 INT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de prototipos de habilidades (skill_proto)
+CREATE TABLE IF NOT EXISTS skill_proto (
+    dwVnum INT UNSIGNED NOT NULL PRIMARY KEY,
+    szName VARCHAR(32) NOT NULL DEFAULT '',
+    bType TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    bMaxLevel TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    dwSplashRange INT UNSIGNED NOT NULL DEFAULT 0,
+    szPointOn VARCHAR(64) NOT NULL DEFAULT '',
+    szPointPoly VARCHAR(100) NOT NULL DEFAULT '',
+    szSPCostPoly VARCHAR(100) NOT NULL DEFAULT '',
+    szDurationPoly VARCHAR(100) NOT NULL DEFAULT '',
+    szDurationSPCostPoly VARCHAR(100) NOT NULL DEFAULT '',
+    szCooldownPoly VARCHAR(100) NOT NULL DEFAULT '',
+    szMasterBonusPoly VARCHAR(100) NOT NULL DEFAULT '',
+    setFlag INT UNSIGNED NOT NULL DEFAULT 0,
+    setAffectFlag INT UNSIGNED NOT NULL DEFAULT 0,
+    szPointOn2 VARCHAR(64) NOT NULL DEFAULT '',
+    szPointPoly2 VARCHAR(100) NOT NULL DEFAULT '',
+    szDurationPoly2 VARCHAR(100) NOT NULL DEFAULT '',
+    setAffectFlag2 INT UNSIGNED NOT NULL DEFAULT 0,
+    szPointOn3 VARCHAR(64) NOT NULL DEFAULT '',
+    szPointPoly3 VARCHAR(100) NOT NULL DEFAULT '',
+    szDurationPoly3 VARCHAR(100) NOT NULL DEFAULT '',
+    szGrandMasterAddSPCostPoly VARCHAR(100) NOT NULL DEFAULT '',
+    bLevelStep TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    bLevelLimit TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    prerequisiteSkillVnum INT UNSIGNED NOT NULL DEFAULT 0,
+    prerequisiteSkillLevel TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    iMaxHit INT NOT NULL DEFAULT 0,
+    szSplashAroundDamageAdjustPoly VARCHAR(100) NOT NULL DEFAULT '',
+    eSkillType TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    dwTargetRange INT UNSIGNED NOT NULL DEFAULT 0,
+    INDEX idx_bType (bType)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de prototipos de items de quest (quest_item_proto)
+CREATE TABLE IF NOT EXISTS quest_item_proto (
+    vnum INT UNSIGNED NOT NULL PRIMARY KEY,
+    name VARCHAR(64) NOT NULL DEFAULT '',
+    locale_name VARCHAR(64) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de atributos de items (item_attr)
+CREATE TABLE IF NOT EXISTS item_attr (
+    apply VARCHAR(32) NOT NULL PRIMARY KEY,
+    prob INT UNSIGNED NOT NULL DEFAULT 0,
+    lv1 INT NOT NULL DEFAULT 0,
+    lv2 INT NOT NULL DEFAULT 0,
+    lv3 INT NOT NULL DEFAULT 0,
+    lv4 INT NOT NULL DEFAULT 0,
+    lv5 INT NOT NULL DEFAULT 0,
+    weapon TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    body TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    wrist TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    foots TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    neck TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    head TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    shield TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    ear TINYINT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de atributos raros de items (item_attr_rare)
+CREATE TABLE IF NOT EXISTS item_attr_rare (
+    apply VARCHAR(32) NOT NULL PRIMARY KEY,
+    prob INT UNSIGNED NOT NULL DEFAULT 0,
+    lv1 INT NOT NULL DEFAULT 0,
+    lv2 INT NOT NULL DEFAULT 0,
+    lv3 INT NOT NULL DEFAULT 0,
+    lv4 INT NOT NULL DEFAULT 0,
+    lv5 INT NOT NULL DEFAULT 0,
+    weapon TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    body TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    wrist TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    foots TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    neck TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    head TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    shield TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    ear TINYINT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de palabras prohibidas (banword)
+CREATE TABLE IF NOT EXISTS banword (
+    word VARCHAR(64) NOT NULL PRIMARY KEY
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de prototipos de objetos de construcción (object_proto)
+CREATE TABLE IF NOT EXISTS object_proto (
+    vnum INT UNSIGNED NOT NULL PRIMARY KEY,
+    price INT UNSIGNED NOT NULL DEFAULT 0,
+    materials VARCHAR(255) NOT NULL DEFAULT '',
+    upgrade_vnum INT UNSIGNED NOT NULL DEFAULT 0,
+    upgrade_limit_time INT UNSIGNED NOT NULL DEFAULT 0,
+    life INT NOT NULL DEFAULT 0,
+    reg_1 INT NOT NULL DEFAULT 0,
+    reg_2 INT NOT NULL DEFAULT 0,
+    reg_3 INT NOT NULL DEFAULT 0,
+    reg_4 INT NOT NULL DEFAULT 0,
+    npc INT UNSIGNED NOT NULL DEFAULT 0,
+    group_vnum INT UNSIGNED NOT NULL DEFAULT 0,
+    dependent_group INT UNSIGNED NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -611,5 +733,136 @@ CREATE TABLE IF NOT EXISTS dragon_slay_log (
     end_time DATETIME NOT NULL,
     INDEX idx_guild_id (guild_id),
     INDEX idx_start_time (start_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de logs de hack (hack_log)
+CREATE TABLE IF NOT EXISTS hack_log (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    time DATETIME NOT NULL,
+    login VARCHAR(24) NOT NULL DEFAULT '',
+    name VARCHAR(24) NOT NULL DEFAULT '',
+    ip VARCHAR(16) NOT NULL DEFAULT '',
+    server VARCHAR(64) NOT NULL DEFAULT '',
+    why VARCHAR(255) NOT NULL DEFAULT '',
+    INDEX idx_time (time),
+    INDEX idx_login (login)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de logs de hack CRC (hack_crc_log)
+CREATE TABLE IF NOT EXISTS hack_crc_log (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    time DATETIME NOT NULL,
+    login VARCHAR(24) NOT NULL DEFAULT '',
+    name VARCHAR(24) NOT NULL DEFAULT '',
+    ip VARCHAR(16) NOT NULL DEFAULT '',
+    server VARCHAR(64) NOT NULL DEFAULT '',
+    why VARCHAR(255) NOT NULL DEFAULT '',
+    crc INT UNSIGNED NOT NULL DEFAULT 0,
+    INDEX idx_time (time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de logs de oro (goldlog)
+CREATE TABLE IF NOT EXISTS goldlog (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    pid INT UNSIGNED NOT NULL DEFAULT 0,
+    what INT UNSIGNED NOT NULL DEFAULT 0,
+    how VARCHAR(32) NOT NULL DEFAULT '',
+    hint VARCHAR(255) NOT NULL DEFAULT '',
+    INDEX idx_pid (pid),
+    INDEX idx_date (date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de logs de cubo (cube)
+CREATE TABLE IF NOT EXISTS cube (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    pid INT UNSIGNED NOT NULL DEFAULT 0,
+    time DATETIME NOT NULL,
+    x INT NOT NULL DEFAULT 0,
+    y INT NOT NULL DEFAULT 0,
+    item_vnum INT UNSIGNED NOT NULL DEFAULT 0,
+    item_uid INT UNSIGNED NOT NULL DEFAULT 0,
+    item_count INT NOT NULL DEFAULT 0,
+    success TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    INDEX idx_pid (pid),
+    INDEX idx_time (time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de logs de speed hack (speed_hack)
+CREATE TABLE IF NOT EXISTS speed_hack (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    pid INT UNSIGNED NOT NULL DEFAULT 0,
+    time DATETIME NOT NULL,
+    x INT NOT NULL DEFAULT 0,
+    y INT NOT NULL DEFAULT 0,
+    hack_count INT NOT NULL DEFAULT 0,
+    INDEX idx_pid (pid),
+    INDEX idx_time (time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de logs de cambio de nombre (change_name)
+CREATE TABLE IF NOT EXISTS change_name (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    pid INT UNSIGNED NOT NULL DEFAULT 0,
+    old_name VARCHAR(24) NOT NULL DEFAULT '',
+    new_name VARCHAR(24) NOT NULL DEFAULT '',
+    time DATETIME NOT NULL,
+    ip VARCHAR(16) NOT NULL DEFAULT '',
+    INDEX idx_pid (pid),
+    INDEX idx_time (time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de logs de HackShield (hackshield_log)
+CREATE TABLE IF NOT EXISTS hackshield_log (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    time DATETIME NOT NULL,
+    account_id INT UNSIGNED NOT NULL DEFAULT 0,
+    login VARCHAR(24) NOT NULL DEFAULT '',
+    pid INT UNSIGNED NOT NULL DEFAULT 0,
+    name VARCHAR(24) NOT NULL DEFAULT '',
+    reason INT UNSIGNED NOT NULL DEFAULT 0,
+    ip INT UNSIGNED NOT NULL DEFAULT 0,
+    INDEX idx_time (time),
+    INDEX idx_account_id (account_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de tiendas (shop)
+CREATE TABLE IF NOT EXISTS shop (
+    vnum INT UNSIGNED NOT NULL PRIMARY KEY,
+    npc_vnum INT UNSIGNED NOT NULL DEFAULT 0,
+    INDEX idx_npc_vnum (npc_vnum)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de items de tiendas (shop_item)
+CREATE TABLE IF NOT EXISTS shop_item (
+    shop_vnum INT UNSIGNED NOT NULL,
+    item_vnum INT UNSIGNED NOT NULL DEFAULT 0,
+    count TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    PRIMARY KEY (shop_vnum, item_vnum),
+    INDEX idx_shop_vnum (shop_vnum),
+    INDEX idx_item_vnum (item_vnum),
+    FOREIGN KEY (shop_vnum) REFERENCES shop(vnum) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de comentarios de gremios (guild_comment)
+CREATE TABLE IF NOT EXISTS guild_comment (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    guild_id INT UNSIGNED NOT NULL DEFAULT 0,
+    name VARCHAR(24) NOT NULL DEFAULT '',
+    notice TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    content VARCHAR(50) NOT NULL DEFAULT '',
+    time DATETIME NOT NULL,
+    INDEX idx_guild_id (guild_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de lista de lotería (lotto_list)
+CREATE TABLE IF NOT EXISTS lotto_list (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    server VARCHAR(32) NOT NULL DEFAULT '',
+    pid INT UNSIGNED NOT NULL DEFAULT 0,
+    time DATETIME NOT NULL,
+    INDEX idx_pid (pid),
+    INDEX idx_time (time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

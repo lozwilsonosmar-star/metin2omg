@@ -1354,7 +1354,7 @@ bool CClientManager::MirrorMobTableIntoDB()
 			snprintf(query, sizeof(query),
 				"replace into mob_proto%s "
 				"("
-				"vnum, name, type, rank, battle_type, level, size, ai_flag, setRaceFlag, setImmuneFlag, "
+				"vnum, name, type, `rank`, battle_type, level, size, ai_flag, setRaceFlag, setImmuneFlag, "
 				"on_click, empire, drop_item, resurrection_vnum, folder, "
 				"st, dx, ht, iq, damage_min, damage_max, max_hp, regen_cycle, regen_percent, exp, "
 				"gold_min, gold_max, def, attack_speed, move_speed, aggressive_hp_pct, aggressive_sight, attack_range, polymorph_item, "
@@ -1406,7 +1406,7 @@ bool CClientManager::MirrorMobTableIntoDB()
 			snprintf(query, sizeof(query),
 				"replace into mob_proto%s "
 				"("
-				"vnum, name, %s, type, rank, battle_type, level, size, ai_flag, setRaceFlag, setImmuneFlag, "
+				"vnum, name, %s, type, `rank`, battle_type, level, size, ai_flag, setRaceFlag, setImmuneFlag, "
 				"on_click, empire, drop_item, resurrection_vnum, folder, "
 				"st, dx, ht, iq, damage_min, damage_max, max_hp, regen_cycle, regen_percent, exp, "
 				"gold_min, gold_max, def, attack_speed, move_speed, aggressive_hp_pct, aggressive_sight, attack_range, polymorph_item, "

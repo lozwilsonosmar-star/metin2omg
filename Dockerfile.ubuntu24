@@ -62,3 +62,4 @@ ENV INTERNAL_BIND_IP=0.0.0.0
 
 ENTRYPOINT ["/usr/bin/bash", "docker-entrypoint.sh"]
 
+

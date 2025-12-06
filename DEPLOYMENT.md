@@ -367,3 +367,4 @@ Ver sección [Troubleshooting](README.md#6-troubleshooting) en el README princip
 - Verificar configuración: `.env` y archivos de configuración
 - Revisar estado de servicios: `systemctl status mariadb`, `docker ps`
 
+

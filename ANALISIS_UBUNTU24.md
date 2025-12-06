@@ -182,3 +182,4 @@ Mantener el Dockerfile con Ubuntu 22.04 donde Python 2 está disponible.
 **Fecha del análisis:** $(date)
 **Versión del repositorio analizada:** Última commit del repositorio clonado
 
+

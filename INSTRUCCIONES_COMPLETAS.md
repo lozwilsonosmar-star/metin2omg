@@ -363,3 +363,4 @@ Asegúrate de que estos puertos estén abiertos en tu firewall y en el panel de 
 
 ¡Listo! Tu servidor Metin2 debería estar funcionando. 🎉
 
+
