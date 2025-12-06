@@ -118,7 +118,7 @@ fi
 
 echo ""
 echo -e "${GREEN}🐳 Paso 7: Construyendo imagen Docker...${NC}"
-docker build -t metin2/server:latest --provenance=false .
+docker build -t metin2/server:latest .
 
 echo ""
 echo -e "${GREEN}⚙️ Paso 8: Configurando archivo .env...${NC}"
