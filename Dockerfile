@@ -57,6 +57,7 @@ RUN mkdir -p /app/lib && \
           ../src/quest && \
     make quest -j $(nproc) && \
     cp qc /bin/qc && \
+    chmod +x /bin/qc && \
     rm -rf /app/build-quest /app/src /app/lib
 
 # Copy the binaries from the build stage
@@ -72,12 +73,12 @@ COPY ./docker/ .
 # Compile the quests
 RUN cd /app/data/quest && python2 make.py
 
-# Symlink the configuration files
-RUN ln -s "./conf/CMD" "CMD"
-RUN ln -s ./conf/item_names_en.txt item_names.txt
-RUN ln -s ./conf/item_proto.txt item_proto.txt
-RUN ln -s ./conf/mob_names_en.txt mob_names.txt
-RUN ln -s ./conf/mob_proto.txt mob_proto.txt
+# Symlink the configuration files (create symlinks only if files exist)
+RUN if [ -f "./conf/CMD" ]; then ln -s "./conf/CMD" "CMD"; fi && \
+    if [ -f "./conf/item_names_en.txt" ]; then ln -s ./conf/item_names_en.txt item_names.txt; fi && \
+    if [ -f "./conf/item_proto.txt" ]; then ln -s ./conf/item_proto.txt item_proto.txt; fi && \
+    if [ -f "./conf/mob_names_en.txt" ]; then ln -s ./conf/mob_names_en.txt mob_names.txt; fi && \
+    if [ -f "./conf/mob_proto.txt" ]; then ln -s ./conf/mob_proto.txt mob_proto.txt; fi
 
 # Set up default environment variables
 ENV PUBLIC_BIND_IP=0.0.0.0
