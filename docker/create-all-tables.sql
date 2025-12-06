@@ -600,6 +600,10 @@ CREATE TABLE IF NOT EXISTS shop_item (
     FOREIGN KEY (shop_vnum) REFERENCES shop(vnum) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Insertar tienda de ejemplo vacía (el servidor requiere al menos una tienda)
+-- Esta tienda puede ser eliminada o modificada después cuando se agreguen tiendas reales
+INSERT IGNORE INTO shop (vnum, npc_vnum) VALUES (1, 0);
+
 -- ============================================================
 -- BASE DE DATOS: metin2_log
 -- ============================================================
