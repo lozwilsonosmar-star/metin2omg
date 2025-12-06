@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS locale (
 -- Insertar valores por defecto de locale
 INSERT IGNORE INTO locale (mValue, mKey) VALUES ('kr', 'LANGUAGE');
 INSERT IGNORE INTO locale (mValue, mKey) VALUES ('korea', 'LOCALE');
+INSERT IGNORE INTO locale (mValue, mKey) VALUES ('1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127', 'SKILL_POWER_BY_LEVEL');
 
 -- Tabla de lista de GMs
 CREATE TABLE IF NOT EXISTS gmlist (
@@ -579,6 +580,24 @@ CREATE TABLE IF NOT EXISTS mob_proto (
     INDEX idx_level (level)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tabla de tiendas (shop)
+CREATE TABLE IF NOT EXISTS shop (
+    vnum INT UNSIGNED NOT NULL PRIMARY KEY,
+    npc_vnum INT UNSIGNED NOT NULL DEFAULT 0,
+    INDEX idx_npc_vnum (npc_vnum)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de items de tiendas (shop_item)
+CREATE TABLE IF NOT EXISTS shop_item (
+    shop_vnum INT UNSIGNED NOT NULL,
+    item_vnum INT UNSIGNED NOT NULL DEFAULT 0,
+    count TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    PRIMARY KEY (shop_vnum, item_vnum),
+    INDEX idx_shop_vnum (shop_vnum),
+    INDEX idx_item_vnum (item_vnum),
+    FOREIGN KEY (shop_vnum) REFERENCES shop(vnum) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================
 -- BASE DE DATOS: metin2_log
 -- ============================================================
@@ -832,24 +851,6 @@ CREATE TABLE IF NOT EXISTS hackshield_log (
     ip INT UNSIGNED NOT NULL DEFAULT 0,
     INDEX idx_time (time),
     INDEX idx_account_id (account_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabla de tiendas (shop)
-CREATE TABLE IF NOT EXISTS shop (
-    vnum INT UNSIGNED NOT NULL PRIMARY KEY,
-    npc_vnum INT UNSIGNED NOT NULL DEFAULT 0,
-    INDEX idx_npc_vnum (npc_vnum)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabla de items de tiendas (shop_item)
-CREATE TABLE IF NOT EXISTS shop_item (
-    shop_vnum INT UNSIGNED NOT NULL,
-    item_vnum INT UNSIGNED NOT NULL DEFAULT 0,
-    count TINYINT UNSIGNED NOT NULL DEFAULT 1,
-    PRIMARY KEY (shop_vnum, item_vnum),
-    INDEX idx_shop_vnum (shop_vnum),
-    INDEX idx_item_vnum (item_vnum),
-    FOREIGN KEY (shop_vnum) REFERENCES shop(vnum) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla de comentarios de gremios (guild_comment)
