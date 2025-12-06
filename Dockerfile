@@ -43,20 +43,21 @@ COPY --from=build /app/src/quest /app/src/quest
 COPY --from=build /app/src/liblua /app/src/liblua
 COPY --from=build /app/src/quest/CMakeLists.txt /app/src/quest/CMakeLists.txt
 COPY --from=build /app/src/liblua/CMakeLists.txt /app/src/liblua/CMakeLists.txt
+# Copy compiled liblua library from build stage
+COPY --from=build /app/build/lib/libliblua.a /app/lib/libliblua.a
 
-# Build liblua first, then qc (compatible with Ubuntu 22.04)
-RUN mkdir -p /app/build-liblua && \
-    cd /app/build-liblua && \
-    cmake ../src/liblua && \
-    make -j $(nproc) && \
+# Build qc using the pre-compiled liblua (compatible with Ubuntu 22.04)
+RUN mkdir -p /app/lib && \
     mkdir -p /app/build-quest && \
     cd /app/build-quest && \
     cmake -DCMAKE_BUILD_TYPE=Release \
-          -Dliblua_DIR=/app/build-liblua \
+          -DCMAKE_PREFIX_PATH=/app \
+          -Dliblua_LIBRARY=/app/lib/libliblua.a \
+          -Dliblua_INCLUDE_DIR=/app/src/liblua/include \
           ../src/quest && \
     make qc -j $(nproc) && \
     cp qc /bin/qc && \
-    rm -rf /app/build-quest /app/build-liblua /app/src
+    rm -rf /app/build-quest /app/src /app/lib
 
 # Copy the binaries from the build stage
 COPY --from=build /app/build/src/db/db /bin/db
