@@ -55,7 +55,7 @@ RUN mkdir -p /app/lib && \
           -Dliblua_LIBRARY=/app/lib/libliblua.a \
           -Dliblua_INCLUDE_DIR=/app/src/liblua/include \
           ../src/quest && \
-    make qc -j $(nproc) && \
+    make quest -j $(nproc) && \
     cp qc /bin/qc && \
     rm -rf /app/build-quest /app/src /app/lib
 
