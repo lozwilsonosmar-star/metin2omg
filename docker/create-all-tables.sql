@@ -37,7 +37,7 @@ USE metin2_common;
 
 -- Tabla de configuración de locale
 CREATE TABLE IF NOT EXISTS locale (
-    mValue VARCHAR(16) NOT NULL,
+    mValue VARCHAR(255) NOT NULL,
     mKey VARCHAR(32) NOT NULL PRIMARY KEY
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
