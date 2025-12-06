@@ -103,10 +103,14 @@ if [ -f ".env" ]; then
         echo -e "${RED}❌ No se encontró docker/create-all-tables.sql${NC}"
     fi
     
-    # Verificación exhaustiva de tablas y columnas
+    # Verificación exhaustiva de bases de datos, tablas, columnas y relaciones
     echo ""
-    echo -e "${GREEN}🔍 Verificando tablas y columnas críticas...${NC}"
-    if [ -f "docker/verificar-y-actualizar-tablas.sh" ]; then
+    echo -e "${GREEN}🔍 Paso 4.1: Verificando y creando bases de datos, tablas, columnas y relaciones...${NC}"
+    if [ -f "docker/verificar-y-crear-todo.sh" ]; then
+        chmod +x docker/verificar-y-crear-todo.sh
+        bash docker/verificar-y-crear-todo.sh
+    elif [ -f "docker/verificar-y-actualizar-tablas.sh" ]; then
+        echo -e "${YELLOW}⚠️  Usando script de verificación anterior...${NC}"
         chmod +x docker/verificar-y-actualizar-tablas.sh
         bash docker/verificar-y-actualizar-tablas.sh
     else
