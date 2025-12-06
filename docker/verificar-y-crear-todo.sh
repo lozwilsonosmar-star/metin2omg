@@ -145,18 +145,26 @@ else
 fi
 echo ""
 
-# Paso 5: Verificar columnas críticas
-echo -e "${BLUE}🔍 Paso 5: Verificando columnas críticas...${NC}"
+# Paso 5: Verificar y agregar columnas críticas faltantes
+echo -e "${BLUE}🔍 Paso 5: Verificando y agregando columnas críticas faltantes...${NC}"
+
+# Ejecutar script para agregar columnas faltantes
+if [ -f "docker/agregar-columnas-faltantes.sql" ]; then
+    echo -e "${YELLOW}   Agregando columnas faltantes si es necesario...${NC}"
+    mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" < docker/agregar-columnas-faltantes.sql 2>&1 | grep -v "Duplicate column name" || true
+    echo -e "${GREEN}   ✅ Script de columnas ejecutado${NC}"
+fi
 
 # Verificar columnas en player
 COLUMNAS_PLAYER=("part_main")
+TODAS_COLUMNAS_OK=true
 for columna in "${COLUMNAS_PLAYER[@]}"; do
     if mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_player \
         -e "SHOW COLUMNS FROM player LIKE '$columna';" 2>/dev/null | grep -q "$columna"; then
         echo -e "  ${GREEN}✅${NC} player.$columna"
     else
         echo -e "  ${RED}❌${NC} player.$columna - FALTANTE"
-        echo -e "${YELLOW}   ⚠️  La columna $columna falta. Necesitarás agregarla manualmente o recrear la tabla.${NC}"
+        TODAS_COLUMNAS_OK=false
     fi
 done
 
@@ -168,9 +176,18 @@ for columna in "${COLUMNAS_GUILD[@]}"; do
         echo -e "  ${GREEN}✅${NC} guild.$columna"
     else
         echo -e "  ${RED}❌${NC} guild.$columna - FALTANTE"
-        echo -e "${YELLOW}   ⚠️  La columna $columna falta. Necesitarás agregarla manualmente o recrear la tabla.${NC}"
+        TODAS_COLUMNAS_OK=false
     fi
 done
+
+echo ""
+
+if [ "$TODAS_COLUMNAS_OK" = true ]; then
+    echo -e "${GREEN}✅ Todas las columnas críticas existen${NC}"
+else
+    echo -e "${YELLOW}⚠️  Algunas columnas críticas aún faltan${NC}"
+    echo -e "${YELLOW}   Intenta ejecutar manualmente: mysql -h$MYSQL_HOST -P$MYSQL_PORT -u$MYSQL_USER -p < docker/agregar-columnas-faltantes.sql${NC}"
+fi
 
 echo ""
 
