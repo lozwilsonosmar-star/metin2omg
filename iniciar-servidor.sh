@@ -90,17 +90,39 @@ echo -e "${GREEN}🛑 Limpiando contenedores antiguos...${NC}"
 docker stop metin2-server 2>/dev/null || true
 docker rm metin2-server 2>/dev/null || true
 
+# Verificar si MySQL está en localhost (host)
+# Si es así, usamos --network host para acceder directamente al MySQL del host
+MYSQL_HOST=$(grep "^MYSQL_HOST=" .env 2>/dev/null | cut -d'=' -f2 | tr -d '"' | tr -d "'" || echo "localhost")
+USE_HOST_NETWORK=false
+
+if [ "$MYSQL_HOST" = "localhost" ] || [ "$MYSQL_HOST" = "127.0.0.1" ]; then
+    echo -e "${YELLOW}⚠️  MySQL está configurado como localhost${NC}"
+    echo -e "${YELLOW}   Usando --network host para acceder al MySQL del host${NC}"
+    USE_HOST_NETWORK=true
+fi
+
 # Iniciar servidor
 echo ""
 echo -e "${GREEN}🚀 Iniciando servidor...${NC}"
-docker run -d \
-  --name metin2-server \
-  --restart unless-stopped \
-  -p 12345:12345 \
-  -p 13200:13200 \
-  -p 8888:8888 \
-  --env-file .env \
-  metin2/server:latest
+if [ "$USE_HOST_NETWORK" = true ]; then
+    # Usar --network host para acceder directamente al MySQL del host
+    docker run -d \
+      --name metin2-server \
+      --restart unless-stopped \
+      --network host \
+      --env-file .env \
+      metin2/server:latest
+else
+    # Usar mapeo de puertos normal
+    docker run -d \
+      --name metin2-server \
+      --restart unless-stopped \
+      -p 12345:12345 \
+      -p 13200:13200 \
+      -p 8888:8888 \
+      --env-file .env \
+      metin2/server:latest
+fi
 
 echo ""
 echo -e "${GREEN}✅ Servidor iniciado!${NC}"
