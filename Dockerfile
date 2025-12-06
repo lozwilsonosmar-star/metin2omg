@@ -26,10 +26,11 @@ RUN mkdir build/
 RUN cd build && cmake -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake ..
 RUN cd build && make -j $(nproc)
 
-FROM ubuntu:24.04 AS app
+FROM ubuntu:22.04 AS app
 WORKDIR /app
 
 # Install Python 2.7 from deadsnakes PPA (required for quest compilation)
+# Ubuntu 22.04 has Python 2.7 available in deadsnakes PPA
 RUN apt-get update && apt-get install -y software-properties-common && apt-get clean
 RUN add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt-get update && apt-get install -y gettext python2.7 libdevil-dev libbsd-dev && apt-get clean
