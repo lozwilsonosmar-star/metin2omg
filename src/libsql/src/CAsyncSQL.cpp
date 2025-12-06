@@ -140,7 +140,15 @@ bool CAsyncSQL::Connect()
         return false;
     }
 
-	if (!mysql_real_connect(&m_hDB, m_stHost.c_str(), m_stUser.c_str(), m_stPassword.c_str(), m_stDB.c_str(), m_iPort, NULL, CLIENT_MULTI_STATEMENTS))
+	// Convert "localhost" to "127.0.0.1" to force TCP/IP instead of Unix socket
+	std::string hostForConnection = m_stHost;
+	if (hostForConnection == "localhost")
+	{
+		hostForConnection = "127.0.0.1";
+		SPDLOG_DEBUG("Converting 'localhost' to '127.0.0.1' to force TCP/IP connection");
+	}
+
+	if (!mysql_real_connect(&m_hDB, hostForConnection.c_str(), m_stUser.c_str(), m_stPassword.c_str(), m_stDB.c_str(), m_iPort, NULL, CLIENT_MULTI_STATEMENTS))
 	{
         SPDLOG_ERROR("MySQL connection failed: {}", mysql_error(&m_hDB));
 		return false;
