@@ -145,122 +145,7 @@ CREATE TABLE IF NOT EXISTS horse_name (
     name VARCHAR(24) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla de tierras
-CREATE TABLE IF NOT EXISTS land (
-    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    map_index INT NOT NULL DEFAULT 0,
-    x INT NOT NULL DEFAULT 0,
-    y INT NOT NULL DEFAULT 0,
-    width INT NOT NULL DEFAULT 0,
-    height INT NOT NULL DEFAULT 0,
-    guild_id INT UNSIGNED NOT NULL DEFAULT 0,
-    guild_level_limit TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    price INT UNSIGNED NOT NULL DEFAULT 0,
-    enable ENUM('YES', 'NO') NOT NULL DEFAULT 'YES',
-    INDEX idx_enable (enable),
-    INDEX idx_guild_id (guild_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla de objetos en el mundo
-CREATE TABLE IF NOT EXISTS `object` (
-    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    land_id INT UNSIGNED NOT NULL DEFAULT 0,
-    vnum INT UNSIGNED NOT NULL DEFAULT 0,
-    map_index INT NOT NULL DEFAULT 0,
-    x INT NOT NULL DEFAULT 0,
-    y INT NOT NULL DEFAULT 0,
-    x_rot FLOAT NOT NULL DEFAULT 0.0,
-    y_rot FLOAT NOT NULL DEFAULT 0.0,
-    z_rot FLOAT NOT NULL DEFAULT 0.0,
-    life INT NOT NULL DEFAULT 0,
-    INDEX idx_land_id (land_id),
-    INDEX idx_map_index (map_index)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabla de prototipos de refinamiento (refine_proto)
-CREATE TABLE IF NOT EXISTS refine_proto (
-    id INT UNSIGNED NOT NULL PRIMARY KEY,
-    cost INT UNSIGNED NOT NULL DEFAULT 0,
-    prob INT UNSIGNED NOT NULL DEFAULT 0,
-    vnum0 INT UNSIGNED NOT NULL DEFAULT 0,
-    count0 INT UNSIGNED NOT NULL DEFAULT 0,
-    vnum1 INT UNSIGNED NOT NULL DEFAULT 0,
-    count1 INT UNSIGNED NOT NULL DEFAULT 0,
-    vnum2 INT UNSIGNED NOT NULL DEFAULT 0,
-    count2 INT UNSIGNED NOT NULL DEFAULT 0,
-    vnum3 INT UNSIGNED NOT NULL DEFAULT 0,
-    count3 INT UNSIGNED NOT NULL DEFAULT 0,
-    vnum4 INT UNSIGNED NOT NULL DEFAULT 0,
-    count4 INT UNSIGNED NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
--- Tabla de prototipos de items de quest (quest_item_proto)
-CREATE TABLE IF NOT EXISTS quest_item_proto (
-    vnum INT UNSIGNED NOT NULL PRIMARY KEY,
-    name VARCHAR(64) NOT NULL DEFAULT '',
-    locale_name VARCHAR(64) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabla de atributos de items (item_attr)
-CREATE TABLE IF NOT EXISTS item_attr (
-    apply VARCHAR(32) NOT NULL PRIMARY KEY,
-    prob INT UNSIGNED NOT NULL DEFAULT 0,
-    lv1 INT NOT NULL DEFAULT 0,
-    lv2 INT NOT NULL DEFAULT 0,
-    lv3 INT NOT NULL DEFAULT 0,
-    lv4 INT NOT NULL DEFAULT 0,
-    lv5 INT NOT NULL DEFAULT 0,
-    weapon TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    body TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    wrist TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    foots TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    neck TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    head TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    shield TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    ear TINYINT UNSIGNED NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabla de atributos raros de items (item_attr_rare)
-CREATE TABLE IF NOT EXISTS item_attr_rare (
-    apply VARCHAR(32) NOT NULL PRIMARY KEY,
-    prob INT UNSIGNED NOT NULL DEFAULT 0,
-    lv1 INT NOT NULL DEFAULT 0,
-    lv2 INT NOT NULL DEFAULT 0,
-    lv3 INT NOT NULL DEFAULT 0,
-    lv4 INT NOT NULL DEFAULT 0,
-    lv5 INT NOT NULL DEFAULT 0,
-    weapon TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    body TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    wrist TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    foots TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    neck TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    head TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    shield TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    ear TINYINT UNSIGNED NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabla de palabras prohibidas (banword)
-CREATE TABLE IF NOT EXISTS banword (
-    word VARCHAR(64) NOT NULL PRIMARY KEY
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabla de prototipos de objetos de construcción (object_proto)
-CREATE TABLE IF NOT EXISTS object_proto (
-    vnum INT UNSIGNED NOT NULL PRIMARY KEY,
-    price INT UNSIGNED NOT NULL DEFAULT 0,
-    materials VARCHAR(255) NOT NULL DEFAULT '',
-    upgrade_vnum INT UNSIGNED NOT NULL DEFAULT 0,
-    upgrade_limit_time INT UNSIGNED NOT NULL DEFAULT 0,
-    life INT NOT NULL DEFAULT 0,
-    reg_1 INT NOT NULL DEFAULT 0,
-    reg_2 INT NOT NULL DEFAULT 0,
-    reg_3 INT NOT NULL DEFAULT 0,
-    reg_4 INT NOT NULL DEFAULT 0,
-    npc INT UNSIGNED NOT NULL DEFAULT 0,
-    group_vnum INT UNSIGNED NOT NULL DEFAULT 0,
-    dependent_group INT UNSIGNED NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
 -- BASE DE DATOS: metin2_player
@@ -547,6 +432,170 @@ CREATE TABLE IF NOT EXISTS mob_proto (
     INDEX idx_type (type),
     INDEX idx_level (level)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- TABLAS PROTO (se leen desde BD al iniciar el servidor DB)
+-- ============================================================
+
+-- Tabla de prototipos de refinamiento (refine_proto)
+CREATE TABLE IF NOT EXISTS refine_proto (
+    id INT UNSIGNED NOT NULL PRIMARY KEY,
+    cost INT UNSIGNED NOT NULL DEFAULT 0,
+    prob INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum0 INT UNSIGNED NOT NULL DEFAULT 0,
+    count0 INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum1 INT UNSIGNED NOT NULL DEFAULT 0,
+    count1 INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum2 INT UNSIGNED NOT NULL DEFAULT 0,
+    count2 INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum3 INT UNSIGNED NOT NULL DEFAULT 0,
+    count3 INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum4 INT UNSIGNED NOT NULL DEFAULT 0,
+    count4 INT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de prototipos de habilidades (skill_proto)
+-- NOTA: Esta tabla debe estar en metin2_player porque el código usa SQL_PLAYER por defecto
+CREATE TABLE IF NOT EXISTS skill_proto (
+    dwVnum INT UNSIGNED NOT NULL PRIMARY KEY,
+    szName VARCHAR(32) NOT NULL DEFAULT '',
+    bType TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    bMaxLevel TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    dwSplashRange INT UNSIGNED NOT NULL DEFAULT 0,
+    szPointOn VARCHAR(64) NOT NULL DEFAULT '',
+    szPointPoly VARCHAR(100) NOT NULL DEFAULT '',
+    szSPCostPoly VARCHAR(100) NOT NULL DEFAULT '',
+    szDurationPoly VARCHAR(100) NOT NULL DEFAULT '',
+    szDurationSPCostPoly VARCHAR(100) NOT NULL DEFAULT '',
+    szCooldownPoly VARCHAR(100) NOT NULL DEFAULT '',
+    szMasterBonusPoly VARCHAR(100) NOT NULL DEFAULT '',
+    setFlag INT UNSIGNED NOT NULL DEFAULT 0,
+    setAffectFlag INT UNSIGNED NOT NULL DEFAULT 0,
+    szPointOn2 VARCHAR(64) NOT NULL DEFAULT '',
+    szPointPoly2 VARCHAR(100) NOT NULL DEFAULT '',
+    szDurationPoly2 VARCHAR(100) NOT NULL DEFAULT '',
+    setAffectFlag2 INT UNSIGNED NOT NULL DEFAULT 0,
+    szPointOn3 VARCHAR(64) NOT NULL DEFAULT '',
+    szPointPoly3 VARCHAR(100) NOT NULL DEFAULT '',
+    szDurationPoly3 VARCHAR(100) NOT NULL DEFAULT '',
+    szGrandMasterAddSPCostPoly VARCHAR(100) NOT NULL DEFAULT '',
+    bLevelStep TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    bLevelLimit TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    prerequisiteSkillVnum INT UNSIGNED NOT NULL DEFAULT 0,
+    prerequisiteSkillLevel TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    iMaxHit INT NOT NULL DEFAULT 0,
+    szSplashAroundDamageAdjustPoly VARCHAR(100) NOT NULL DEFAULT '',
+    eSkillType TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    dwTargetRange INT UNSIGNED NOT NULL DEFAULT 0,
+    INDEX idx_bType (bType)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de prototipos de items de quest (quest_item_proto)
+CREATE TABLE IF NOT EXISTS quest_item_proto (
+    vnum INT UNSIGNED NOT NULL PRIMARY KEY,
+    name VARCHAR(64) NOT NULL DEFAULT '',
+    locale_name VARCHAR(64) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de atributos de items (item_attr)
+CREATE TABLE IF NOT EXISTS item_attr (
+    apply VARCHAR(32) NOT NULL PRIMARY KEY,
+    prob INT UNSIGNED NOT NULL DEFAULT 0,
+    lv1 INT NOT NULL DEFAULT 0,
+    lv2 INT NOT NULL DEFAULT 0,
+    lv3 INT NOT NULL DEFAULT 0,
+    lv4 INT NOT NULL DEFAULT 0,
+    lv5 INT NOT NULL DEFAULT 0,
+    weapon TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    body TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    wrist TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    foots TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    neck TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    head TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    shield TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    ear TINYINT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de atributos raros de items (item_attr_rare)
+CREATE TABLE IF NOT EXISTS item_attr_rare (
+    apply VARCHAR(32) NOT NULL PRIMARY KEY,
+    prob INT UNSIGNED NOT NULL DEFAULT 0,
+    lv1 INT NOT NULL DEFAULT 0,
+    lv2 INT NOT NULL DEFAULT 0,
+    lv3 INT NOT NULL DEFAULT 0,
+    lv4 INT NOT NULL DEFAULT 0,
+    lv5 INT NOT NULL DEFAULT 0,
+    weapon TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    body TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    wrist TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    foots TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    neck TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    head TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    shield TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    ear TINYINT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de palabras prohibidas (banword)
+CREATE TABLE IF NOT EXISTS banword (
+    word VARCHAR(64) NOT NULL PRIMARY KEY
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de prototipos de objetos de construcción (object_proto)
+CREATE TABLE IF NOT EXISTS object_proto (
+    vnum INT UNSIGNED NOT NULL PRIMARY KEY,
+    price INT UNSIGNED NOT NULL DEFAULT 0,
+    materials VARCHAR(255) NOT NULL DEFAULT '',
+    upgrade_vnum INT UNSIGNED NOT NULL DEFAULT 0,
+    upgrade_limit_time INT UNSIGNED NOT NULL DEFAULT 0,
+    life INT NOT NULL DEFAULT 0,
+    reg_1 INT NOT NULL DEFAULT 0,
+    reg_2 INT NOT NULL DEFAULT 0,
+    reg_3 INT NOT NULL DEFAULT 0,
+    reg_4 INT NOT NULL DEFAULT 0,
+    npc INT UNSIGNED NOT NULL DEFAULT 0,
+    group_vnum INT UNSIGNED NOT NULL DEFAULT 0,
+    dependent_group INT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- TABLAS DE CONSTRUCCIÓN
+-- ============================================================
+
+-- Tabla de tierras (land)
+CREATE TABLE IF NOT EXISTS land (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    map_index INT NOT NULL DEFAULT 0,
+    x INT NOT NULL DEFAULT 0,
+    y INT NOT NULL DEFAULT 0,
+    width INT NOT NULL DEFAULT 0,
+    height INT NOT NULL DEFAULT 0,
+    guild_id INT UNSIGNED NOT NULL DEFAULT 0,
+    guild_level_limit TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    price INT UNSIGNED NOT NULL DEFAULT 0,
+    enable ENUM('YES', 'NO') NOT NULL DEFAULT 'YES',
+    INDEX idx_enable (enable),
+    INDEX idx_guild_id (guild_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de objetos en el mundo (object)
+CREATE TABLE IF NOT EXISTS `object` (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    land_id INT UNSIGNED NOT NULL DEFAULT 0,
+    vnum INT UNSIGNED NOT NULL DEFAULT 0,
+    map_index INT NOT NULL DEFAULT 0,
+    x INT NOT NULL DEFAULT 0,
+    y INT NOT NULL DEFAULT 0,
+    x_rot FLOAT NOT NULL DEFAULT 0.0,
+    y_rot FLOAT NOT NULL DEFAULT 0.0,
+    z_rot FLOAT NOT NULL DEFAULT 0.0,
+    life INT NOT NULL DEFAULT 0,
+    INDEX idx_land_id (land_id),
+    INDEX idx_map_index (map_index)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- TABLAS DE TIENDAS
+-- ============================================================
 
 -- Tabla de tiendas (shop)
 CREATE TABLE IF NOT EXISTS shop (
