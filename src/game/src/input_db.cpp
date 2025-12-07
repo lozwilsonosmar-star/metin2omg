@@ -1727,6 +1727,13 @@ void CInputDB::AuthLogin(LPDESC d, const char * c_pData)
 
 	d->Packet(&ptoc, sizeof(TPacketGCAuthSuccess));
 	SPDLOG_INFO("AuthLogin result {} key {}", bResult, d->GetLoginKey());
+
+	// Cambiar a PHASE_SELECT para que el cliente pueda enviar HEADER_CG_LOGIN_BY_KEY
+	if (bResult)
+	{
+		d->SetPhase(PHASE_SELECT);
+		SPDLOG_DEBUG("AuthLogin: Changed phase to PHASE_SELECT for login key {}", d->GetLoginKey());
+	}
 }
 
 void CInputDB::ChangeEmpirePriv(const char* c_pData)
