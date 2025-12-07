@@ -2,6 +2,10 @@
 # Script MAESTRO - Hace TODO en el orden correcto
 # Uso: sudo bash setup-completo-vps.sh
 # 
+# ⚠️ IMPORTANTE: Este script NO modifica el firewall
+# ⚠️ IMPORTANTE: Este script NO elimina reglas de firewall existentes
+# ⚠️ IMPORTANTE: Este script es 100% seguro para tu configuración actual
+# 
 # Este script:
 # 1. Actualiza el código desde Git
 # 2. Limpia Docker (libera espacio)
@@ -10,6 +14,11 @@
 # 5. Reconstruye el servidor Docker
 # 6. Inicia el servidor
 # 7. Verifica que todo esté funcionando
+# 
+# ❌ NO hace:
+# - NO modifica firewall (ufw/iptables)
+# - NO elimina reglas existentes
+# - NO cambia configuraciones del sistema
 
 set -e
 
