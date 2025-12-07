@@ -171,8 +171,18 @@ echo -e "${YELLOW}   ⏳ Esto puede tardar 10-20 minutos...${NC}"
 echo -e "${YELLOW}   ☕ Tómate un café mientras tanto${NC}"
 echo ""
 
-export DOCKER_BUILDKIT=1
-if docker build --rm -t metin2/server:latest .; then
+# Intentar usar BuildKit si está disponible, sino usar builder tradicional
+if docker buildx version &>/dev/null; then
+    echo -e "${YELLOW}   Usando BuildKit (buildx disponible)${NC}"
+    export DOCKER_BUILDKIT=1
+    docker build --rm -t metin2/server:latest .
+else
+    echo -e "${YELLOW}   Usando builder tradicional (buildx no disponible)${NC}"
+    unset DOCKER_BUILDKIT
+    docker build --rm -t metin2/server:latest .
+fi
+
+if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Imagen Docker reconstruida${NC}"
 else
     echo -e "${RED}❌ Error al construir la imagen Docker${NC}"
