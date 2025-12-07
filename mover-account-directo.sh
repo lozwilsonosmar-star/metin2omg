@@ -51,6 +51,7 @@ echo ""
 # 2. Verificar si account ya existe en TARGET_DB
 echo -e "${YELLOW}2. Verificando si 'account' ya existe en $TARGET_DB...${NC}"
 ACCOUNT_IN_TARGET=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -D"$TARGET_DB" -e "SHOW TABLES LIKE 'account';" 2>/dev/null | grep -c "^account$" || echo "0")
+ACCOUNT_IN_TARGET=$(echo "$ACCOUNT_IN_TARGET" | tr -d '\n' | head -1)
 
 if [ "$ACCOUNT_IN_TARGET" -gt 0 ]; then
     TARGET_COUNT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -D"$TARGET_DB" -sN -e "SELECT COUNT(*) FROM account;" 2>/dev/null || echo "0")
@@ -82,16 +83,39 @@ echo ""
 
 # 3. Crear tabla en TARGET_DB
 echo -e "${YELLOW}3. Creando tabla 'account' en $TARGET_DB...${NC}"
+
+# Deshabilitar modo estricto temporalmente para crear la tabla
 mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -D"$TARGET_DB" -e "
+    SET SESSION sql_mode = '';
     CREATE TABLE account LIKE $SOURCE_DB.account;
 " 2>&1
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Tabla creada${NC}"
 else
-    echo -e "${RED}❌ Error al crear tabla${NC}"
-    unset MYSQL_PWD
-    exit 1
+    echo -e "${YELLOW}⚠️  Error con LIKE, intentando con SHOW CREATE TABLE...${NC}"
+    
+    # Alternativa: obtener la estructura y crear manualmente
+    CREATE_STMT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -D"$SOURCE_DB" -sN -e "SHOW CREATE TABLE account\G" 2>/dev/null | grep -A 100 "^Create Table:" | sed 's/Create Table: //' | sed "s/ENGINE=InnoDB/ENGINE=InnoDB DEFAULT CHARSET=utf8mb4/" || echo "")
+    
+    if [ -n "$CREATE_STMT" ]; then
+        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -D"$TARGET_DB" -e "
+            SET SESSION sql_mode = '';
+            $CREATE_STMT;
+        " 2>&1
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✅ Tabla creada (método alternativo)${NC}"
+        else
+            echo -e "${RED}❌ Error al crear tabla${NC}"
+            unset MYSQL_PWD
+            exit 1
+        fi
+    else
+        echo -e "${RED}❌ No se pudo obtener la estructura de la tabla${NC}"
+        unset MYSQL_PWD
+        exit 1
+    fi
 fi
 
 echo ""
@@ -99,6 +123,7 @@ echo ""
 # 4. Copiar datos
 echo -e "${YELLOW}4. Copiando datos de $SOURCE_DB a $TARGET_DB...${NC}"
 mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -D"$TARGET_DB" -e "
+    SET SESSION sql_mode = '';
     INSERT INTO account SELECT * FROM $SOURCE_DB.account;
 " 2>&1
 
