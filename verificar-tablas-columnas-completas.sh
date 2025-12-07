@@ -101,8 +101,8 @@ echo ""
 # account (en metin2_account)
 check_table_columns "$MYSQL_DB_ACCOUNT" "account" "id,login,password,social_id,status,availDt,create_time,last_play" "Tabla account (autenticación)"
 
-# player_index (en metin2_player) - CRÍTICA para LOGIN_BY_KEY
-check_table_columns "$MYSQL_DB_PLAYER" "player_index" "id,pid1,pid2,pid3,pid4,empire" "Tabla player_index (índice de personajes por cuenta)" "check_data"
+# player_index (en metin2_account) - CRÍTICA para LOGIN_BY_KEY
+check_table_columns "$MYSQL_DB_ACCOUNT" "player_index" "id,pid1,pid2,pid3,pid4,empire" "Tabla player_index (índice de personajes por cuenta)" "check_data"
 
 # ============================================================
 # 2. TABLAS DE PERSONAJES (PLAYER)
@@ -159,7 +159,7 @@ else
     echo -e "${GREEN}✅ Cuenta 'test' encontrada (ID: $ACCOUNT_ID)${NC}"
     
     # Verificar player_index
-    PLAYER_INDEX_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB_PLAYER" -e "SELECT COUNT(*) FROM player_index WHERE id=$ACCOUNT_ID;" 2>/dev/null | tail -n 1)
+    PLAYER_INDEX_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB_ACCOUNT" -e "SELECT COUNT(*) FROM player_index WHERE id=$ACCOUNT_ID;" 2>/dev/null | tail -n 1)
     
     if [ "$PLAYER_INDEX_EXISTS" -eq 0 ]; then
         echo -e "${YELLOW}⚠️  No existe registro en player_index para cuenta ID $ACCOUNT_ID${NC}"
@@ -169,7 +169,7 @@ else
         echo -e "${GREEN}✅ Registro en player_index existe para cuenta ID $ACCOUNT_ID${NC}"
         
         # Mostrar datos
-        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB_PLAYER" -e "SELECT id, pid1, pid2, pid3, pid4, empire FROM player_index WHERE id=$ACCOUNT_ID;" 2>/dev/null
+        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB_ACCOUNT" -e "SELECT id, pid1, pid2, pid3, pid4, empire FROM player_index WHERE id=$ACCOUNT_ID;" 2>/dev/null
     fi
     
     # Verificar personajes
