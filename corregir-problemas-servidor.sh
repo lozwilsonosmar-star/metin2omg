@@ -73,23 +73,46 @@ if [ "$SKILL_COUNT" = "0" ] || [ -z "$SKILL_COUNT" ]; then
     echo -e "${RED}   ❌ skill_proto está vacía (0 registros)${NC}"
     echo -e "${YELLOW}   ⚠️  Intentando importar datos...${NC}"
     
-    # Verificar si existe el script de importación
-    if [ -f "docker/importar-datos-dump.sh" ]; then
-        echo -e "${GREEN}   ✅ Ejecutando script de importación...${NC}"
-        bash docker/importar-datos-dump.sh
-        
-        # Verificar nuevamente
-        SKILL_COUNT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DB_PLAYER" -se "SELECT COUNT(*) FROM skill_proto;" 2>/dev/null || echo "0")
-        
-        if [ "$SKILL_COUNT" != "0" ] && [ -n "$SKILL_COUNT" ]; then
-            echo -e "${GREEN}   ✅ Datos importados correctamente: $SKILL_COUNT registros${NC}"
+    # Verificar si existe el directorio de dumps
+    DUMP_DIR="metin2_mysql_dump"
+    if [ ! -d "$DUMP_DIR" ]; then
+        echo -e "${RED}   ❌ No se encontró el directorio $DUMP_DIR${NC}"
+        echo ""
+        echo -e "${YELLOW}   📋 SOLUCIÓN:${NC}"
+        echo "   1. Los archivos SQL están en el repositorio pero pueden no haberse descargado"
+        echo "   2. Verifica si el directorio existe: ls -la metin2_mysql_dump/"
+        echo "   3. Si no existe, los archivos .sql están en .gitignore y no se suben al repo"
+        echo "   4. Necesitas subir manualmente los dumps SQL al VPS:"
+        echo ""
+        echo -e "${BLUE}   Opción A: Subir archivos manualmente${NC}"
+        echo "      - Usa SCP/SFTP para subir metin2_mysql_dump/*.sql al VPS"
+        echo "      - O crea el directorio y copia los archivos:"
+        echo "        mkdir -p metin2_mysql_dump"
+        echo "        # Luego sube player.sql, common.sql, account.sql, log.sql"
+        echo ""
+        echo -e "${BLUE}   Opción B: Importar directamente desde tu máquina local${NC}"
+        echo "      mysql -h127.0.0.1 -P3306 -umetin2 -p metin2_player < player.sql"
+        echo ""
+        echo -e "${YELLOW}   ⚠️  El servidor NO puede iniciar sin datos en skill_proto${NC}"
+    else
+        # Verificar si existe el script de importación
+        if [ -f "docker/importar-datos-dump.sh" ]; then
+            echo -e "${GREEN}   ✅ Ejecutando script de importación...${NC}"
+            bash docker/importar-datos-dump.sh
+            
+            # Verificar nuevamente
+            SKILL_COUNT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DB_PLAYER" -se "SELECT COUNT(*) FROM skill_proto;" 2>/dev/null || echo "0")
+            
+            if [ "$SKILL_COUNT" != "0" ] && [ -n "$SKILL_COUNT" ]; then
+                echo -e "${GREEN}   ✅ Datos importados correctamente: $SKILL_COUNT registros${NC}"
+            else
+                echo -e "${RED}   ❌ La importación falló o no hay datos disponibles${NC}"
+                echo -e "${YELLOW}   ⚠️  Verifica que los archivos .sql existan en $DUMP_DIR/${NC}"
+            fi
         else
-            echo -e "${RED}   ❌ La importación falló o no hay datos disponibles${NC}"
+            echo -e "${RED}   ❌ Script de importación no encontrado${NC}"
             echo -e "${YELLOW}   ⚠️  Necesitas importar manualmente los datos de skill_proto${NC}"
         fi
-    else
-        echo -e "${RED}   ❌ Script de importación no encontrado${NC}"
-        echo -e "${YELLOW}   ⚠️  Necesitas importar manualmente los datos de skill_proto${NC}"
     fi
 else
     echo -e "${GREEN}   ✅ skill_proto tiene datos: $SKILL_COUNT registros${NC}"
