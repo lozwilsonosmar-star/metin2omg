@@ -103,19 +103,29 @@ Test-NetConnection -ComputerName 72.61.12.2 -Port 12345
 
 ### 5. 🔧 Verificar configuración del servidor
 
-Asegúrate de que el archivo `.env` tenga la IP pública correcta:
+Asegúrate de que el archivo `.env` tenga la IP pública correcta (IPv4):
 
 ```bash
 cd /opt/metin2omg
 cat .env | grep PUBLIC_IP
 ```
 
-**Debe mostrar:** `PUBLIC_IP=72.61.12.2`
+**Debe mostrar:** `PUBLIC_IP=72.61.12.2` (IPv4, NO IPv6)
 
-Si está mal, editar:
+**⚠️ IMPORTANTE:** El cliente Metin2 NO soporta IPv6. Debe ser IPv4.
+
+Si está mal (por ejemplo, si muestra una IPv6 como `2a02:4780:2d:d297::1`), corregir automáticamente:
+```bash
+cd /opt/metin2omg
+git pull origin main
+chmod +x corregir-ip-publica.sh
+bash corregir-ip-publica.sh
+```
+
+O manualmente:
 ```bash
 nano .env
-# Cambiar PUBLIC_IP a 72.61.12.2
+# Cambiar PUBLIC_IP a 72.61.12.2 (IPv4)
 # Guardar (Ctrl+O, Enter, Ctrl+X)
 # Reiniciar contenedor: docker restart metin2-server
 ```
