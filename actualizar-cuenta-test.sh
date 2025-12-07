@@ -20,25 +20,17 @@ TEST_USER="test"
 # Hash SHA1 de la contraseña (sin el asterisco inicial)
 PASSWORD_HASH="CC67043C7BCFF5EEA5566BD9B1F3C74FD9A5CF5D"
 
-# Obtener credenciales MySQL del .env
-if [ -f ".env" ]; then
-    MYSQL_USER=$(grep "^MYSQL_USER=" .env | cut -d'=' -f2 | tr -d '"' | tr -d "'" | xargs || echo "metin2")
-    MYSQL_PASSWORD=$(grep "^MYSQL_PASSWORD=" .env | cut -d'=' -f2 | tr -d '"' | tr -d "'" | xargs || echo "")
-    MYSQL_HOST=$(grep "^MYSQL_HOST=" .env | cut -d'=' -f2 | tr -d '"' | tr -d "'" | xargs || echo "localhost")
-    MYSQL_PORT=$(grep "^MYSQL_PORT=" .env | cut -d'=' -f2 | tr -d '"' | tr -d "'" | xargs || echo "3306")
-else
-    echo -e "${RED}❌ Archivo .env no encontrado${NC}"
-    exit 1
-fi
+# Usar root ya que metin2 no tiene permisos
+MYSQL_USER="root"
+MYSQL_PASSWORD="proyectalean"
+MYSQL_HOST="localhost"
+MYSQL_PORT="3306"
 
-export MYSQL_PWD="$MYSQL_PASSWORD"
-
-echo "1. Verificando conexión a MySQL..."
-if mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_account -e "SELECT 1;" 2>/dev/null; then
+echo "1. Verificando conexión a MySQL como root..."
+if mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -Dmetin2_account -e "SELECT 1;" 2>/dev/null; then
     echo -e "   ${GREEN}✅ Conexión exitosa${NC}"
 else
     echo -e "   ${RED}❌ Error al conectar a MySQL${NC}"
-    unset MYSQL_PWD
     exit 1
 fi
 echo ""
@@ -49,7 +41,7 @@ ACCOUNT_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_
 if [ "$ACCOUNT_EXISTS" -gt 0 ]; then
     echo -e "   ${GREEN}✅ La cuenta existe${NC}"
     echo "   Información actual:"
-    mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_account -e "SELECT login, password, social_id, status FROM account WHERE login='$TEST_USER';" 2>/dev/null
+    mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -Dmetin2_account -e "SELECT login, password, social_id, status FROM account WHERE login='$TEST_USER';" 2>/dev/null
     echo ""
     echo "   Actualizando contraseña y status..."
 else
@@ -63,29 +55,28 @@ echo "   Password Hash: $PASSWORD_HASH"
 echo ""
 
 # Actualizar o crear la cuenta
-mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_account -e "INSERT INTO account (login, password, social_id, status) VALUES ('$TEST_USER', '$PASSWORD_HASH', 'A', 'OK') ON DUPLICATE KEY UPDATE password='$PASSWORD_HASH', status='OK';" 2>&1
+mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -Dmetin2_account -e "INSERT INTO account (login, password, social_id, status) VALUES ('$TEST_USER', '$PASSWORD_HASH', 'A', 'OK') ON DUPLICATE KEY UPDATE password='$PASSWORD_HASH', status='OK';" 2>&1
 
 if [ $? -eq 0 ]; then
     echo -e "   ${GREEN}✅ Cuenta actualizada/creada exitosamente${NC}"
 else
     echo -e "   ${RED}❌ Error al actualizar la cuenta${NC}"
     echo "   Intentando con REPLACE..."
-    mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_account -e "REPLACE INTO account (login, password, social_id, status) VALUES ('$TEST_USER', '$PASSWORD_HASH', 'A', 'OK');" 2>&1
+    mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -Dmetin2_account -e "REPLACE INTO account (login, password, social_id, status) VALUES ('$TEST_USER', '$PASSWORD_HASH', 'A', 'OK');" 2>&1
     
     if [ $? -eq 0 ]; then
         echo -e "   ${GREEN}✅ Cuenta actualizada con REPLACE${NC}"
     else
         echo -e "   ${RED}❌ Error persistente${NC}"
         echo "   Verificando estructura de la tabla..."
-        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_account -e "DESCRIBE account;" 2>&1
-        unset MYSQL_PWD
+        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -Dmetin2_account -e "DESCRIBE account;" 2>&1
         exit 1
     fi
 fi
 echo ""
 
 echo "4. Verificando que la cuenta se actualizó correctamente..."
-ACCOUNT_INFO=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_account -e "SELECT login, password, social_id, status FROM account WHERE login='$TEST_USER';" 2>/dev/null | tail -1)
+ACCOUNT_INFO=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -Dmetin2_account -e "SELECT login, password, social_id, status FROM account WHERE login='$TEST_USER';" 2>/dev/null | tail -1)
 
 if [ -n "$ACCOUNT_INFO" ] && [ "$ACCOUNT_INFO" != "login	password	social_id	status" ]; then
     echo -e "   ${GREEN}✅ Cuenta verificada${NC}"
@@ -109,18 +100,15 @@ if [ -n "$ACCOUNT_INFO" ] && [ "$ACCOUNT_INFO" != "login	password	social_id	stat
     else
         echo -e "   ${YELLOW}⚠️  Status: $CURRENT_STATUS (debe ser 'OK')${NC}"
         echo "   Actualizando status..."
-        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_account -e "UPDATE account SET status='OK' WHERE login='$TEST_USER';" 2>/dev/null
+        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -Dmetin2_account -e "UPDATE account SET status='OK' WHERE login='$TEST_USER';" 2>/dev/null
         if [ $? -eq 0 ]; then
             echo -e "   ${GREEN}✅ Status actualizado${NC}"
         fi
     fi
 else
     echo -e "   ${RED}❌ No se pudo verificar la cuenta${NC}"
-    unset MYSQL_PWD
     exit 1
 fi
-
-unset MYSQL_PWD
 
 echo ""
 echo "=========================================="
