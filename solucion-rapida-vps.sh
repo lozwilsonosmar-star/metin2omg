@@ -41,14 +41,23 @@ fi
 
 export MYSQL_PWD="$MYSQL_PASSWORD"
 
-# 4. Insertar datos mínimos en skill_proto
-echo "3. Insertando datos mínimos en skill_proto..."
+# 4. Insertar datos en skill_proto
+echo "3. Verificando e insertando datos en skill_proto..."
 SKILL_COUNT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_player -sN -e "SELECT COUNT(*) FROM skill_proto;" 2>/dev/null || echo "0")
 
 if [ "$SKILL_COUNT" = "0" ] || [ -z "$SKILL_COUNT" ]; then
-    echo "⚠️  skill_proto está vacía, insertando datos mínimos..."
+    echo "⚠️  skill_proto está vacía..."
     
-    mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" metin2_player <<EOF 2>&1 | grep -v "Duplicate entry" || true
+    # Intentar importar desde player.sql si existe
+    if [ -f "metin2_mysql_dump/player.sql" ]; then
+        echo "✅ Encontrado player.sql, importando datos completos..."
+        sed 's/INSERT INTO/INSERT IGNORE INTO/g' metin2_mysql_dump/player.sql | \
+            mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" metin2_player 2>&1 | \
+            grep -v "already exists\|Duplicate entry\|Warning" || true
+        echo "✅ Datos de player.sql importados"
+    else
+        echo "⚠️  player.sql no encontrado, insertando datos mínimos..."
+        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" metin2_player <<EOF 2>&1 | grep -v "Duplicate entry" || true
 INSERT IGNORE INTO skill_proto (
     dwVnum, szName, bType, bMaxLevel, dwSplashRange,
     szPointOn, szPointPoly, szSPCostPoly, szDurationPoly, szDurationSPCostPoly,
@@ -67,10 +76,12 @@ INSERT IGNORE INTO skill_proto (
     0, '0', 0, 0
 );
 EOF
-
+        echo "✅ Datos mínimos insertados"
+    fi
+    
     SKILL_COUNT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_player -sN -e "SELECT COUNT(*) FROM skill_proto;" 2>/dev/null || echo "0")
     if [ "$SKILL_COUNT" != "0" ]; then
-        echo "✅ Datos mínimos insertados: $SKILL_COUNT registros"
+        echo "✅ skill_proto ahora tiene $SKILL_COUNT registros"
     else
         echo "❌ Error al insertar datos"
     fi
