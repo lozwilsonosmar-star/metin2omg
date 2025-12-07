@@ -16,6 +16,9 @@ CLIENT_PACKAGE=""
 if [ -d "./Client-20251206T130044Z-3-001/Client/Client/Client/pack" ]; then
     CLIENT_PACKAGE="./Client-20251206T130044Z-3-001/Client/Client/Client/pack"
     echo "✅ Encontrada carpeta pack/ en el cliente"
+elif [ -d "./Client-20251206T130044Z-3-001/Client/Client/Client/package" ]; then
+    CLIENT_PACKAGE="./Client-20251206T130044Z-3-001/Client/Client/Client/package"
+    echo "✅ Encontrada carpeta package/ en el cliente"
 elif [ -d "./basesfiles/metin2_server+src/metin2/server/share/package" ]; then
     CLIENT_PACKAGE="./basesfiles/metin2_server+src/metin2/server/share/package"
     echo "✅ Encontrada carpeta package/ en basesfiles"
@@ -23,7 +26,12 @@ else
     echo "⚠️ No se encontró carpeta package/ o pack/"
     echo ""
     echo "Buscando en el cliente..."
-    find ./Client-20251206T130044Z-3-001 -type d -name "pack*" -o -name "package*" 2>/dev/null | head -5
+    find ./Client-20251206T130044Z-3-001 -type d \( -name "pack" -o -name "package" \) 2>/dev/null | head -5
+    echo ""
+    echo "La carpeta pack/ debe estar en:"
+    echo "  ./Client-20251206T130044Z-3-001/Client/Client/Client/pack"
+    echo ""
+    echo "Si no está en el VPS, necesitas subirla manualmente desde tu máquina local."
     exit 1
 fi
 
