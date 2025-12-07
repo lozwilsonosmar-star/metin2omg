@@ -32,11 +32,42 @@ MYSQL_PASSWORD=${MYSQL_PASSWORD:-Osmar2405}
 MYSQL_DB_PLAYER=${MYSQL_DB_PLAYER:-metin2_player}
 MYSQL_DB_ACCOUNT=${MYSQL_DB_ACCOUNT:-metin2_account}
 
+# Ajustar localhost
+if [ "$MYSQL_HOST" = "localhost" ]; then
+    MYSQL_HOST="127.0.0.1"
+fi
+
 echo -e "${YELLOW}Conectando a MySQL...${NC}"
 echo "Host: $MYSQL_HOST:$MYSQL_PORT"
 echo "Usuario: $MYSQL_USER"
 echo "Base de datos: $MYSQL_DB_PLAYER, $MYSQL_DB_ACCOUNT"
 echo ""
+
+# Verificar conexión primero
+export MYSQL_PWD="$MYSQL_PASSWORD"
+if ! mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -e "SELECT 1;" >/dev/null 2>&1; then
+    echo -e "${RED}❌ Error al conectar a MySQL con usuario '$MYSQL_USER'${NC}"
+    echo -e "${YELLOW}   Intentando con usuario 'root'...${NC}"
+    echo ""
+    
+    # Intentar con root
+    MYSQL_USER="root"
+    MYSQL_PASSWORD="proyectalean"
+    export MYSQL_PWD="$MYSQL_PASSWORD"
+    
+    if ! mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -e "SELECT 1;" >/dev/null 2>&1; then
+        echo -e "${RED}❌ Error al conectar con 'root' también${NC}"
+        echo -e "${YELLOW}   Verifica las credenciales manualmente${NC}"
+        unset MYSQL_PWD
+        exit 1
+    else
+        echo -e "${GREEN}✅ Conectado con usuario 'root'${NC}"
+        echo ""
+    fi
+else
+    echo -e "${GREEN}✅ Conexión exitosa con usuario '$MYSQL_USER'${NC}"
+    echo ""
+fi
 
 ERRORS=0
 WARNINGS=0
@@ -52,7 +83,7 @@ check_table_columns() {
     echo "  Tabla: $TABLE en $DB"
     
     # Verificar que la tabla existe
-    TABLE_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$DB" -e "SHOW TABLES LIKE '$TABLE';" 2>/dev/null | grep -c "$TABLE")
+    TABLE_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" "$DB" -e "SHOW TABLES LIKE '$TABLE';" 2>/dev/null | grep -c "$TABLE")
     
     if [ "$TABLE_EXISTS" -eq 0 ]; then
         echo -e "  ${RED}❌ Tabla '$TABLE' NO existe en $DB${NC}"
@@ -66,7 +97,7 @@ check_table_columns() {
     IFS=',' read -ra COLS <<< "$COLUMNS"
     for COL in "${COLS[@]}"; do
         COL=$(echo "$COL" | xargs) # Trim whitespace
-        COL_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$DB" -e "SHOW COLUMNS FROM $TABLE LIKE '$COL';" 2>/dev/null | grep -c "$COL")
+        COL_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" "$DB" -e "SHOW COLUMNS FROM $TABLE LIKE '$COL';" 2>/dev/null | grep -c "$COL")
         
         if [ "$COL_EXISTS" -eq 0 ]; then
             echo -e "  ${RED}❌ Columna '$COL' NO existe en $TABLE${NC}"
@@ -78,7 +109,7 @@ check_table_columns() {
     
     # Verificar si hay datos (opcional, solo para tablas que deben tener datos)
     if [ "$5" = "check_data" ]; then
-        ROW_COUNT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$DB" -e "SELECT COUNT(*) FROM $TABLE;" 2>/dev/null | tail -n 1)
+        ROW_COUNT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" "$DB" -e "SELECT COUNT(*) FROM $TABLE;" 2>/dev/null | tail -n 1)
         if [ "$ROW_COUNT" -eq 0 ]; then
             echo -e "  ${YELLOW}  ⚠️  Tabla está vacía (0 registros)${NC}"
             ((WARNINGS++))
@@ -149,7 +180,7 @@ echo -e "${GREEN}═════════════════════
 echo ""
 
 # Obtener ID de cuenta de prueba
-ACCOUNT_ID=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB_ACCOUNT" -e "SELECT id FROM account WHERE login='test' LIMIT 1;" 2>/dev/null | tail -n 1)
+ACCOUNT_ID=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" "$MYSQL_DB_ACCOUNT" -e "SELECT id FROM account WHERE login='test' LIMIT 1;" 2>/dev/null | tail -n 1)
 
 if [ -z "$ACCOUNT_ID" ] || [ "$ACCOUNT_ID" = "NULL" ]; then
     echo -e "${RED}❌ No se encontró cuenta 'test' en account${NC}"
@@ -159,7 +190,7 @@ else
     echo -e "${GREEN}✅ Cuenta 'test' encontrada (ID: $ACCOUNT_ID)${NC}"
     
     # Verificar player_index
-    PLAYER_INDEX_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB_ACCOUNT" -e "SELECT COUNT(*) FROM player_index WHERE id=$ACCOUNT_ID;" 2>/dev/null | tail -n 1)
+    PLAYER_INDEX_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" "$MYSQL_DB_ACCOUNT" -e "SELECT COUNT(*) FROM player_index WHERE id=$ACCOUNT_ID;" 2>/dev/null | tail -n 1)
     
     if [ "$PLAYER_INDEX_EXISTS" -eq 0 ]; then
         echo -e "${YELLOW}⚠️  No existe registro en player_index para cuenta ID $ACCOUNT_ID${NC}"
@@ -169,11 +200,11 @@ else
         echo -e "${GREEN}✅ Registro en player_index existe para cuenta ID $ACCOUNT_ID${NC}"
         
         # Mostrar datos
-        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB_ACCOUNT" -e "SELECT id, pid1, pid2, pid3, pid4, empire FROM player_index WHERE id=$ACCOUNT_ID;" 2>/dev/null
+        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" "$MYSQL_DB_ACCOUNT" -e "SELECT id, pid1, pid2, pid3, pid4, empire FROM player_index WHERE id=$ACCOUNT_ID;" 2>/dev/null
     fi
     
     # Verificar personajes
-    PLAYER_COUNT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB_PLAYER" -e "SELECT COUNT(*) FROM player WHERE account_id=$ACCOUNT_ID;" 2>/dev/null | tail -n 1)
+    PLAYER_COUNT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" "$MYSQL_DB_PLAYER" -e "SELECT COUNT(*) FROM player WHERE account_id=$ACCOUNT_ID;" 2>/dev/null | tail -n 1)
     
     if [ "$PLAYER_COUNT" -eq 0 ]; then
         echo -e "${YELLOW}⚠️  No hay personajes creados para esta cuenta${NC}"
@@ -181,11 +212,14 @@ else
         ((WARNINGS++))
     else
         echo -e "${GREEN}✅ Encontrados $PLAYER_COUNT personaje(s) para esta cuenta${NC}"
-        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB_PLAYER" -e "SELECT id, name, job, level, map_index, x, y FROM player WHERE account_id=$ACCOUNT_ID LIMIT 4;" 2>/dev/null
+        mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" "$MYSQL_DB_PLAYER" -e "SELECT id, name, job, level, map_index, x, y FROM player WHERE account_id=$ACCOUNT_ID LIMIT 4;" 2>/dev/null
     fi
 fi
 
 echo ""
+
+# Limpiar variable de entorno
+unset MYSQL_PWD
 
 # ============================================================
 # RESUMEN
