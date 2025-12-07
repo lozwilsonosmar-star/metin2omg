@@ -51,16 +51,37 @@ echo "   Contenido:"
 cat "$SERVERLIST_FILE"
 echo ""
 
-# 3. Buscar archivos Python que puedan contener la configuración del servidor
-echo "3. Buscando archivos de configuración Python..."
-PYTHON_FILES=$(find "$CLIENT_PATH/Eternexus/uiscript" -name "*.py" 2>/dev/null | head -5)
-if [ -n "$PYTHON_FILES" ]; then
-    echo "   ✅ Archivos Python encontrados"
-    echo "   ℹ️  La configuración del servidor puede estar en scripts Python"
-    echo "   Archivos encontrados:"
-    echo "$PYTHON_FILES" | head -3
+# 3. Configurar serverinfo.py (archivo principal de configuración)
+echo "3. Configurando serverinfo.py..."
+SERVERINFO_FILE="$CLIENT_PATH/Eternexus/root/serverinfo.py"
+if [ -f "$SERVERINFO_FILE" ]; then
+    echo "   ✅ serverinfo.py encontrado"
+    echo "   Actualizando configuración..."
+    
+    # Crear backup
+    cp "$SERVERINFO_FILE" "$SERVERINFO_FILE.backup"
+    echo "   ✅ Backup creado: serverinfo.py.backup"
+    
+    # Actualizar SERVER_IP
+    sed -i "s/SERVER_IP[[:space:]]*=[[:space:]]*\"[^\"]*\"/SERVER_IP = \"$SERVER_IP\"/" "$SERVERINFO_FILE"
+    
+    # Actualizar SERVER_NAME
+    sed -i "s/SERVER_NAME[[:space:]]*=[[:space:]]*\"[^\"]*\"/SERVER_NAME = \"$SERVER_NAME\"/" "$SERVERINFO_FILE"
+    
+    # Actualizar puertos
+    sed -i "s/PORT_1[[:space:]]*=[[:space:]]*[0-9]*/PORT_1 = $SERVER_PORT/" "$SERVERINFO_FILE"
+    sed -i "s/PORT_2[[:space:]]*=[[:space:]]*[0-9]*/PORT_2 = $SERVER_PORT/" "$SERVERINFO_FILE"
+    sed -i "s/PORT_3[[:space:]]*=[[:space:]]*[0-9]*/PORT_3 = $SERVER_PORT/" "$SERVERINFO_FILE"
+    sed -i "s/PORT_4[[:space:]]*=[[:space:]]*[0-9]*/PORT_4 = $SERVER_PORT/" "$SERVERINFO_FILE"
+    sed -i "s/PORT_MARK[[:space:]]*=[[:space:]]*[0-9]*/PORT_MARK = $SERVER_PORT/" "$SERVERINFO_FILE"
+    
+    echo "   ✅ serverinfo.py actualizado"
+    echo "   Cambios realizados:"
+    echo "     - SERVER_IP = \"$SERVER_IP\""
+    echo "     - SERVER_NAME = \"$SERVER_NAME\""
+    echo "     - PORT_1, PORT_2, PORT_3, PORT_4, PORT_MARK = $SERVER_PORT"
 else
-    echo "   ⚠️  No se encontraron archivos Python en uiscript"
+    echo "   ⚠️  serverinfo.py no encontrado en: $SERVERINFO_FILE"
 fi
 echo ""
 
@@ -131,6 +152,7 @@ echo "✅ CONFIGURACIÓN COMPLETADA"
 echo "=========================================="
 echo ""
 echo "📋 Archivos configurados:"
+echo "   ✅ serverinfo.py: SERVER_IP=$SERVER_IP, SERVER_NAME=$SERVER_NAME, PORT=$SERVER_PORT"
 echo "   ✅ serverlist.txt: $SERVER_NAME	$SERVER_IP	$SERVER_PORT"
 echo "   ✅ channel.inf: (verificado)"
 echo "   ✅ INSTRUCCIONES_CONEXION.txt: (creado)"
