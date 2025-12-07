@@ -65,10 +65,17 @@ fi
 echo "3. Copiando datos de metin2_account.account a metin2_player.account..."
 echo ""
 
-# Copiar la cuenta test
+# Copiar la cuenta test, manejando valores de fecha inválidos
 mysql -uroot -pproyectalean -Dmetin2_player <<EOF
+SET SESSION sql_mode = '';
 INSERT INTO account (login, password, social_id, status, last_play, create_time)
-SELECT login, password, social_id, status, last_play, create_time
+SELECT 
+    login, 
+    password, 
+    social_id, 
+    status, 
+    COALESCE(NULLIF(last_play, '0000-00-00 00:00:00'), NOW()) as last_play,
+    COALESCE(NULLIF(create_time, '0000-00-00 00:00:00'), NOW()) as create_time
 FROM metin2_account.account
 WHERE login='test'
 ON DUPLICATE KEY UPDATE 
