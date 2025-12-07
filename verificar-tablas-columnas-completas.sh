@@ -43,31 +43,33 @@ echo "Usuario: $MYSQL_USER"
 echo "Base de datos: $MYSQL_DB_PLAYER, $MYSQL_DB_ACCOUNT"
 echo ""
 
-# Verificar conexión primero
-export MYSQL_PWD="$MYSQL_PASSWORD"
+# Ajustar localhost
+if [ "$MYSQL_HOST" = "localhost" ]; then
+    MYSQL_HOST="127.0.0.1"
+fi
+
+# Verificar conexión primero - intentar con root directamente ya que es más confiable
+echo -e "${YELLOW}Intentando conectar con usuario 'root'...${NC}"
+export MYSQL_PWD="proyectalean"
+MYSQL_USER="root"
+
 if ! mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -e "SELECT 1;" >/dev/null 2>&1; then
-    echo -e "${RED}❌ Error al conectar a MySQL con usuario '$MYSQL_USER'${NC}"
-    echo -e "${YELLOW}   Intentando con usuario 'root'...${NC}"
-    echo ""
-    
-    # Intentar con root
-    MYSQL_USER="root"
-    MYSQL_PASSWORD="proyectalean"
+    echo -e "${YELLOW}   Root falló, intentando con 'metin2'...${NC}"
     export MYSQL_PWD="$MYSQL_PASSWORD"
+    MYSQL_USER="metin2"
     
     if ! mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -e "SELECT 1;" >/dev/null 2>&1; then
-        echo -e "${RED}❌ Error al conectar con 'root' también${NC}"
+        echo -e "${RED}❌ Error al conectar a MySQL${NC}"
         echo -e "${YELLOW}   Verifica las credenciales manualmente${NC}"
         unset MYSQL_PWD
         exit 1
     else
-        echo -e "${GREEN}✅ Conectado con usuario 'root'${NC}"
-        echo ""
+        echo -e "${GREEN}✅ Conectado con usuario 'metin2'${NC}"
     fi
 else
-    echo -e "${GREEN}✅ Conexión exitosa con usuario '$MYSQL_USER'${NC}"
-    echo ""
+    echo -e "${GREEN}✅ Conectado con usuario 'root'${NC}"
 fi
+echo ""
 
 ERRORS=0
 WARNINGS=0
