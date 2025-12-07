@@ -152,6 +152,17 @@ if [ -f ".env" ]; then
     else
         echo -e "${YELLOW}⚠️  Script de verificación no encontrado${NC}"
     fi
+    
+    # Importar datos desde dumps SQL si existen
+    echo ""
+    echo -e "${GREEN}📥 Paso 4.2: Importando datos desde dumps SQL (si existen)...${NC}"
+    if [ -f "docker/importar-datos-dump.sh" ] && [ -d "metin2_mysql_dump" ]; then
+        chmod +x docker/importar-datos-dump.sh
+        bash docker/importar-datos-dump.sh
+    else
+        echo -e "${YELLOW}⚠️  No se encontraron dumps SQL o script de importación${NC}"
+        echo -e "${YELLOW}   Los datos se cargarán desde los archivos .txt al iniciar el servidor${NC}"
+    fi
 else
     echo -e "${YELLOW}⚠️  No se encontró archivo .env${NC}"
     echo -e "${YELLOW}   Ejecutando script SQL manualmente...${NC}"

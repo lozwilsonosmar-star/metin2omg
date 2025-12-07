@@ -620,6 +620,35 @@ CREATE TABLE IF NOT EXISTS shop_item (
 INSERT IGNORE INTO shop (vnum, npc_vnum) VALUES (1, 0);
 
 -- ============================================================
+-- DATOS MÍNIMOS INICIALES (OPCIONAL - solo si no tienes datos reales)
+-- ============================================================
+-- NOTA: Si ya tienes datos reales para skill_proto, refine_proto, etc.,
+-- NO necesitas este skill dummy. Simplemente importa tus datos reales.
+-- 
+-- Si NO tienes datos, descomenta el INSERT de abajo para permitir
+-- que el servidor inicie (solo para testing):
+/*
+-- Skill dummy mínimo (requerido para que el servidor inicie si no hay datos reales)
+INSERT IGNORE INTO skill_proto (
+    dwVnum, szName, bType, bMaxLevel, dwSplashRange,
+    szPointOn, szPointPoly, szSPCostPoly, szDurationPoly, szDurationSPCostPoly,
+    szCooldownPoly, szMasterBonusPoly, setFlag, setAffectFlag,
+    szPointOn2, szPointPoly2, szDurationPoly2, setAffectFlag2,
+    szPointOn3, szPointPoly3, szDurationPoly3, szGrandMasterAddSPCostPoly,
+    bLevelStep, bLevelLimit, prerequisiteSkillVnum, prerequisiteSkillLevel,
+    iMaxHit, szSplashAroundDamageAdjustPoly, eSkillType, dwTargetRange
+) VALUES (
+    1, 'Dummy Skill', 0, 1, 0,
+    '0', '0', '0', '0', '0',
+    '0', '0', 0, 0,
+    '0', '0', '0', 0,
+    '0', '0', '0', '0',
+    0, 0, 0, 0,
+    0, '0', 0, 0
+);
+*/
+
+-- ============================================================
 -- BASE DE DATOS: metin2_log
 -- ============================================================
 USE metin2_log;
