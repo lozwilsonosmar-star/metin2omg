@@ -36,7 +36,7 @@ fi
 echo ""
 
 echo "2. Verificando cuenta '$TEST_USER'..."
-ACCOUNT_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -Dmetin2_account -e "SELECT COUNT(*) FROM account WHERE login='$TEST_USER';" 2>/dev/null | tail -1 || echo "0")
+ACCOUNT_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -Dmetin2_account -e "SELECT COUNT(*) FROM account WHERE login='$TEST_USER';" 2>/dev/null | tail -1 || echo "0")
 
 if [ "$ACCOUNT_EXISTS" -gt 0 ]; then
     echo -e "   ${GREEN}✅ La cuenta existe${NC}"
