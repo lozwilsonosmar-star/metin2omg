@@ -29,11 +29,14 @@ docker logs --tail 100 metin2-server 2>&1 | grep -i "package\|crypt" | tail -10
 
 echo ""
 echo "4. Buscando error 'Failed to Load ClientPackageCryptInfo Files':"
-ERROR_COUNT=$(docker logs --tail 200 metin2-server 2>&1 | grep -c "Failed to Load ClientPackageCryptInfo Files" || echo "0")
-if [ "$ERROR_COUNT" -eq 0 ]; then
+ERROR_FOUND=$(docker logs --tail 200 metin2-server 2>&1 | grep "Failed to Load ClientPackageCryptInfo Files" | tail -1)
+if [ -z "$ERROR_FOUND" ]; then
     echo "   ✅ No se encontró el error (los archivos se cargaron correctamente)"
+    ERROR_COUNT=0
 else
-    echo "   ⚠️ Aún aparece el error ($ERROR_COUNT veces)"
+    echo "   ⚠️ Aún aparece el error:"
+    echo "   $ERROR_FOUND"
+    ERROR_COUNT=1
 fi
 
 echo ""
@@ -41,11 +44,15 @@ echo "5. Verificando logs de AuthLogin y LOGIN_BY_KEY (últimos 50 logs):"
 docker logs --tail 50 metin2-server 2>&1 | grep -E "AuthLogin|LOGIN_BY_KEY|PHASE_SELECT" | tail -10
 
 echo ""
+echo "6. Verificando logs completos del servidor (últimas 30 líneas):"
+docker logs --tail 30 metin2-server 2>&1 | grep -v "item_proto_test\|No test file" | tail -15
+
+echo ""
 echo "═══════════════════════════════════════════"
 echo "RESUMEN"
 echo "═══════════════════════════════════════════"
 echo ""
-if [ "$ERROR_COUNT" -eq 0 ]; then
+if [ "${ERROR_COUNT:-1}" -eq 0 ]; then
     echo "✅ Los archivos de package/ se cargaron correctamente"
     echo ""
     echo "Ahora intenta conectarte desde el cliente y deberías ver:"
