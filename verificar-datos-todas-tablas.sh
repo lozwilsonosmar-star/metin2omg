@@ -171,12 +171,13 @@ if [ -d "metin2_mysql_dump" ]; then
             
             # Contar INSERT statements
             INSERT_COUNT=$(grep -c "^INSERT INTO" "$dump_file" 2>/dev/null || echo "0")
+            INSERT_COUNT=$(echo "$INSERT_COUNT" | tr -d '\n' | head -1)
             
             echo "   Archivo: $FILE_NAME"
             echo "   Tamaño: $FILE_SIZE"
             echo "   Inserts: $INSERT_COUNT"
             
-            if [ "$INSERT_COUNT" -gt 0 ]; then
+            if [ "$INSERT_COUNT" -gt 0 ] 2>/dev/null; then
                 echo -e "   ${GREEN}✓ Contiene datos para importar${NC}"
             else
                 echo -e "   ${YELLOW}⚠️  No contiene INSERT statements${NC}"
