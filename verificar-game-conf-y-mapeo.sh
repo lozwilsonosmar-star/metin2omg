@@ -132,8 +132,9 @@ if echo "$ALL_DATABASES" | grep -q "^$PLAYER_DB$"; then
     echo -e "${GREEN}✅ $PLAYER_DB (PLAYER_SQL) existe${NC}"
     
     # Verificar tabla account (el servidor la busca aquí según input_auth.cpp)
-    ACCOUNT_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -D"$PLAYER_DB" -e "SHOW TABLES LIKE 'account';" 2>/dev/null | grep -c "account" || echo "0")
-    if [ "$ACCOUNT_EXISTS" -gt 0 ]; then
+    ACCOUNT_EXISTS=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -D"$PLAYER_DB" -e "SHOW TABLES LIKE 'account';" 2>/dev/null | grep -c "^account$" || echo "0")
+    ACCOUNT_EXISTS=$(echo "$ACCOUNT_EXISTS" | tr -d '\n' | head -1)
+    if [ "$ACCOUNT_EXISTS" -gt 0 ] 2>/dev/null; then
         COUNT=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -D"$PLAYER_DB" -sN -e "SELECT COUNT(*) FROM account;" 2>/dev/null || echo "0")
         echo -e "   ${GREEN}✓ Tabla 'account' existe ($COUNT registros)${NC}"
     else
@@ -192,7 +193,9 @@ else
     echo -e "${RED}❌ Se encontraron $ERRORS problema(s)${NC}"
     echo ""
     
-    if [ "$ACCOUNT_EXISTS" -eq 0 ] && [ -n "$PLAYER_DB" ]; then
+    ACCOUNT_EXISTS_CHECK=$(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -D"$PLAYER_DB" -e "SHOW TABLES LIKE 'account';" 2>/dev/null | grep -c "^account$" || echo "0")
+    ACCOUNT_EXISTS_CHECK=$(echo "$ACCOUNT_EXISTS_CHECK" | tr -d '\n' | head -1)
+    if [ "$ACCOUNT_EXISTS_CHECK" -eq 0 ] && [ -n "$PLAYER_DB" ]; then
         echo -e "${YELLOW}SOLUCIÓN: Mover tabla 'account' a $PLAYER_DB${NC}"
         echo ""
         echo "Ejecuta estos comandos:"
