@@ -168,7 +168,7 @@ void CInputLogin::LoginByKey(LPDESC d, const char * data)
 		}
 	}
 
-	SPDLOG_DEBUG("LOGIN_BY_KEY: {} key {}", login, pinfo->dwLoginKey);
+	SPDLOG_INFO("LOGIN_BY_KEY: {} key {} (phase: {})", login, pinfo->dwLoginKey, d->GetPhase());
 
 	d->SetLoginKey(pinfo->dwLoginKey);
 

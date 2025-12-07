@@ -1732,7 +1732,7 @@ void CInputDB::AuthLogin(LPDESC d, const char * c_pData)
 	if (bResult)
 	{
 		d->SetPhase(PHASE_SELECT);
-		SPDLOG_DEBUG("AuthLogin: Changed phase to PHASE_SELECT for login key {}", d->GetLoginKey());
+		SPDLOG_INFO("AuthLogin: Changed phase to PHASE_SELECT for login key {} (waiting for LOGIN_BY_KEY)", d->GetLoginKey());
 	}
 }
 
