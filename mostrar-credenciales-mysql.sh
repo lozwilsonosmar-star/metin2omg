@@ -24,8 +24,8 @@ if [ "$MYSQL_HOST" = "localhost" ]; then
     MYSQL_HOST="127.0.0.1"
 fi
 
-# Obtener IP pública
-PUBLIC_IP=$(curl -s ifconfig.me 2>/dev/null || echo "72.61.12.2")
+# Obtener IP pública (IPv4)
+PUBLIC_IP=$(curl -s -4 ifconfig.me 2>/dev/null || curl -s ifconfig.me 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' || echo "72.61.12.2")
 
 echo "📋 Información de Conexión MySQL:"
 echo ""
